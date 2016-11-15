@@ -14,4 +14,19 @@ repositories {
 
 dependencies {
     compile gradleApi()
+
+    compile "org.slf4j:slf4j-api:$SLF4J_VERSION"
+
+    compile "org.springframework:spring-core:$SPRING_VERSION"
+    compile "org.springframework:spring-web:$SPRING_VERSION"
+    compile "com.jayway.jsonpath:json-path:$JSONPATH_VERSION"
+    compile "org.jsoup:jsoup:$JSOUP_VERSION"
+    compile "org.pegdown:pegdown:1.6.0"
+
+    compile "org.apache.logging.log4j:log4j-core:$LOG4J2_VERSION"
+    compile "org.apache.logging.log4j:log4j-slf4j-impl:$LOG4J2_VERSION"
+
+    testCompile "junit:junit:$JUNIT_VERSION"
+    testCompile "org.mockito:mockito-core:$MOCKITO_VERSION"
+    testCompile "org.springframework:spring-test:$SPRING_VERSION"
 }
