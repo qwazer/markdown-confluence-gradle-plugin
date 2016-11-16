@@ -41,8 +41,9 @@ confluence {
 
 ### Description of config parameters
 
+
 parameter | datatype | optional | description
------------- | -------------
+------------ | ------------- | -------------| -------------
 authentication | String | no | 'user:pass'.bytes.encodeBase64().toString()
 confluenceRestApiUrl | String | no |  confluence rest api url
 spaceKey | String | no |  space key
