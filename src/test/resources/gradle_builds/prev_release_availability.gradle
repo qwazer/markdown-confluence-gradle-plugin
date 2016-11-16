@@ -1,0 +1,20 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.1'
+    }
+}
+
+apply plugin: 'com.github.qwazer.markdown-confluence'
+
+confluence {
+    parentPage 'Home'
+    authentication 'admin:admin'.bytes.encodeBase64().toString()
+    confluenceRestApiUrl 'https://acme.com:8090/rest/api/'
+    spaceKey 'SAMPLE'
+    title 'projectName'
+    baseFile = file('README.md')
+    sslTrustAll true
+}

@@ -43,7 +43,7 @@ public class ConfluenceGradleTaskIT {
 
 
 
-        String content = IOUtils.toString(this.getClass().getResource("/build.gradle.sample")) ;
+        String content = IOUtils.toString(this.getClass().getResource("/gradle_builds/sample_build.gradle")) ;
         String version = readCurrentVerion();
         content = content.replaceAll("\\$VERSION", version);
         writeFile(buildFile, content);
@@ -61,6 +61,19 @@ public class ConfluenceGradleTaskIT {
     }
 
 
+    @Test
+    @Ignore //todo remove
+    public void testPrevReleaseAvailability() throws Exception {
+        String content = IOUtils.toString(this.getClass().getResource("/gradle_builds/prev_release_availability.gradle")) ;
+        writeFile(buildFile, content);
+        writeFile(readmeFile, "==hello");
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence")
+                .build();
+        assertTrue(result.getOutput().contains("Hello world!"));
+
+    }
 
     private static String readCurrentVerion() throws IOException {
         Properties prop = new Properties();
