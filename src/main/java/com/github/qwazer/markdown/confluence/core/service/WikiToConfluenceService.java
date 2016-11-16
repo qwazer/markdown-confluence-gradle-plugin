@@ -1,7 +1,7 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.ConfluenceAPIException;
+import com.github.qwazer.markdown.confluence.core.ConfluenceException;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePageBuilder;
 import com.jayway.jsonpath.JsonPath;
@@ -55,8 +55,11 @@ public class WikiToConfluenceService  {
 
         CONFLUENCE_CONFIG.set(confluenceConfig);
 
+
+        Long ancestorId = findAncestorId(confluenceConfig);
+
         ConfluencePage confluencePage =  new ConfluencePage();
-        confluencePage.setAncestorId(confluenceConfig.getAncestorId());
+        confluencePage.setAncestorId(ancestorId);
         confluencePage.setConfluenceTitle(confluenceConfig.getTitle());
         confluencePage.setContent(wiki);
 
@@ -71,6 +74,45 @@ public class WikiToConfluenceService  {
             createPage(confluencePage);
         }
 
+    }
+
+    protected Long findAncestorId(ConfluenceConfig confluenceConfig) {
+
+
+        final HttpHeaders httpHeaders = buildHttpHeaders(confluenceConfig.getAuthentication());
+        final HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(confluenceConfig.getConfluenceRestApiUrl())
+                .path("/content")
+                .queryParam(SPACE_KEY, confluenceConfig.getSpaceKey());
+
+        if (confluenceConfig.getParentPage()!=null && !confluenceConfig.getParentPage().isEmpty()){
+            builder = builder.queryParam(TITLE, confluenceConfig.getParentPage());
+        }
+
+        final URI targetUrl = builder
+                .build()
+                .toUri();
+
+        final ResponseEntity<String> responseEntity = restTemplate.exchange(targetUrl,
+                HttpMethod.GET, requestEntity, String.class);
+
+        final String jsonBody = responseEntity.getBody();
+
+        LOG.debug("GET RESPONSE: {}", jsonBody);
+
+        String id =null;
+        try {
+            id = JsonPath.read(jsonBody, "$.results[0].id");
+        }
+        catch (PathNotFoundException e){
+            //todo log
+            throw e;
+        }
+
+
+        return Long.parseLong(id);
     }
 
 
@@ -170,7 +212,7 @@ public class WikiToConfluenceService  {
             final JSONObject response = jsonParser.parse(responseJson, JSONObject.class);
             return Long.valueOf((String) response.get(ID));
         } catch (ParseException e) {
-            throw new ConfluenceAPIException("Error Parsing JSON Response from Confluence!", e);
+            throw new ConfluenceException("Error Parsing JSON Response from Confluence!", e);
         }
     }
 

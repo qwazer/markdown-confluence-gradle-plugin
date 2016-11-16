@@ -8,7 +8,7 @@ import java.io.File;
  */
 public class ConfluenceConfig {
 
-    private Long ancestorId;
+    private String parentPage;
     private String authentication;
     private String confluenceRestApiUrl;
     private File baseFile;
@@ -16,14 +16,6 @@ public class ConfluenceConfig {
     private String title;
     private boolean sslTrustAll = false;
 
-
-    public Long getAncestorId() {
-        return ancestorId;
-    }
-
-    public void setAncestorId(Long ancestorId) {
-        this.ancestorId = ancestorId;
-    }
 
     public File getBaseFile() {
         return baseFile;
@@ -71,5 +63,13 @@ public class ConfluenceConfig {
 
     public void setConfluenceRestApiUrl(String confluenceRestApiUrl) {
         this.confluenceRestApiUrl = confluenceRestApiUrl;
+    }
+
+    public String getParentPage() {
+        return parentPage;
+    }
+
+    public void setParentPage(String parentPage) {
+        this.parentPage = parentPage;
     }
 }

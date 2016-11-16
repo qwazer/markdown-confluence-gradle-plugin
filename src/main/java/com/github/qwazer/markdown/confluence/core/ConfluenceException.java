@@ -15,14 +15,15 @@
  */
 package com.github.qwazer.markdown.confluence.core;
 
-public class ConfluenceAPIException extends RuntimeException {
+public class ConfluenceException extends RuntimeException {
 
-    public ConfluenceAPIException(String message) {
+    public ConfluenceException(String message) {
         super(message);
     }
 
-    public ConfluenceAPIException(String message, Throwable cause) {
+    public ConfluenceException(String message, Throwable cause) {
         super(message, cause);
     }
 
 }
+

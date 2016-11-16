@@ -13,7 +13,6 @@ public class TestConfigFactory {
     public static  ConfluenceConfig testConfluenceConfig(){
         ConfluenceConfig config = new ConfluenceConfig();
 
-        config.setAncestorId(0L);
         config.setSpaceKey("SN");
         config.setConfluenceRestApiUrl("http://localhost:8090/rest/api/");
         config.setAuthentication(getAuth());

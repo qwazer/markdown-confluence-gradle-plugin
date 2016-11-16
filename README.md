@@ -27,10 +27,10 @@ Sample config
 
 ````
 confluence {
-    ancestorId 95791817
     authentication 'base64-encoded user:pass'
     confluenceRestApiUrl 'https://confluence.acme.com/rest/api/'
     spaceKey 'SAMPLE'
+    parentPage 'Home'
     title $projectName
     baseFile = file('README.md')
     sslTrustAll true

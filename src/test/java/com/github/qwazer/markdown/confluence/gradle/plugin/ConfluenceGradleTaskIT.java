@@ -39,7 +39,6 @@ public class ConfluenceGradleTaskIT {
     }
 
     @Test
-    @Ignore
     public void testConfluenceTask() throws IOException {
 
 

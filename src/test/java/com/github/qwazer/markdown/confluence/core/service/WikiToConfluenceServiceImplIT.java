@@ -1,5 +1,6 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
+import com.github.qwazer.markdown.confluence.core.SpringConfig;
 import com.github.qwazer.markdown.confluence.core.UrlChecker;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
@@ -8,23 +9,25 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = SpringConfig.class)
 public class WikiToConfluenceServiceImplIT {
 
-    WikiToConfluenceService confluenceService;
-    ConfluenceConfig confluenceConfig;
+    @Autowired
+    private WikiToConfluenceService confluenceService;
+    private final ConfluenceConfig confluenceConfig = TestConfigFactory.testConfluenceConfig();
 
-
-    @Before
-    public void setUp() throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
-        confluenceService = new WikiToConfluenceService(restTemplate);
-        confluenceConfig = TestConfigFactory.testConfluenceConfig();
-    }
 
     @Before
     public void pingRestAPIUrl(){
@@ -48,4 +51,11 @@ public class WikiToConfluenceServiceImplIT {
     }
 
 
+    @Test
+    public void testFindAncestorId() throws Exception {
+        confluenceConfig.setParentPage("SN+Home");
+        Long id = confluenceService.findAncestorId(confluenceConfig);
+        assertNotNull(id);
+
+    }
 }

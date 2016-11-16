@@ -11,7 +11,7 @@ buildscript {
 apply plugin: 'com.github.qwazer.markdown-confluence'
 
 confluence {
-    ancestorId 95791817
+    parentPage 'Home'
     authentication 'admin:admin'.bytes.encodeBase64().toString()
     confluenceRestApiUrl 'http://localhost:8090/rest/api/'
     spaceKey 'SAMPLE'
