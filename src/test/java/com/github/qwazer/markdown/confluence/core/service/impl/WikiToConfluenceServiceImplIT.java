@@ -1,9 +1,12 @@
 package com.github.qwazer.markdown.confluence.core.service.impl;
 
+import com.github.qwazer.markdown.confluence.core.UrlChecker;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.ConfluenceConfigTestFactory;
+import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
 import com.github.qwazer.markdown.confluence.core.service.Wiki2ConfluenceService;
+import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,15 +23,24 @@ public class WikiToConfluenceServiceImplIT {
     public void setUp() throws Exception {
         RestTemplate restTemplate = new RestTemplate();
         confluenceService = new WikiToConfluenceServiceImpl(restTemplate);
-        confluenceConfig = ConfluenceConfigTestFactory.testConfluenceConfig();
+        confluenceConfig = TestConfigFactory.testConfluenceConfig();
+    }
+
+    @Before
+    public void pingRestAPIUrl(){
+        String url = TestConfigFactory.testConfluenceConfig().getConfluenceRestApiUrl();
+        Assume.assumeTrue( "Url should be available " + url ,
+                UrlChecker.pingConfluence(url, 200));
     }
 
     @Test
+    @Ignore
     public void testExistenseOfConfluence() throws Exception {
         confluenceService.postWikiToConfluence(confluenceConfig, "test");
     }
 
     @Test
+    @Ignore
     public void testSimple() throws Exception {
         confluenceService.postWikiToConfluence(confluenceConfig, "h1.gradle-markdown-confluence\n" +
                 "\n" +

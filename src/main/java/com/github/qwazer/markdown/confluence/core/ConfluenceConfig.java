@@ -1,6 +1,7 @@
 package com.github.qwazer.markdown.confluence.core;
 
 
+import java.io.File;
 
 /**
  * Created by Anton Reshetnikov on 10 Nov 2016.
@@ -10,8 +11,7 @@ public class ConfluenceConfig {
     private Long ancestorId;
     private String authentication;
     private String confluenceRestApiUrl;
-    private String baseDir;
-    private String baseFile = "README.md";
+    private File baseFile;
     private String spaceKey;
     private String title;
     private boolean sslTrustAll = false;
@@ -25,19 +25,11 @@ public class ConfluenceConfig {
         this.ancestorId = ancestorId;
     }
 
-    public String getBaseDir() {
-        return baseDir;
-    }
-
-    public void setBaseDir(String baseDir) {
-        this.baseDir = baseDir;
-    }
-
-    public String getBaseFile() {
+    public File getBaseFile() {
         return baseFile;
     }
 
-    public void setBaseFile(String baseFile) {
+    public void setBaseFile(File baseFile) {
         this.baseFile = baseFile;
     }
 

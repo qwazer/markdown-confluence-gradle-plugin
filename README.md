@@ -32,7 +32,7 @@ confluence {
     confluenceRestApiUrl 'https://confluence.acme.com/rest/api/'
     spaceKey 'SAMPLE'
     title $projectName
-    baseDir = ''
+    baseFile = file('README.md')
     sslTrustAll true
 }
 

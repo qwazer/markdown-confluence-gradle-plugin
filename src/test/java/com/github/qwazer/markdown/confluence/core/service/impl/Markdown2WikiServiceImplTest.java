@@ -1,6 +1,7 @@
 package com.github.qwazer.markdown.confluence.core.service.impl;
 
 import org.junit.Test;
+import org.springframework.util.Assert;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
@@ -17,7 +18,8 @@ public class Markdown2WikiServiceImplTest {
 
         String xhtml = markdown2XtmlService.convertMarkdown2Wiki(s);
 
-        System.out.println("xhtml = " + xhtml);
+        Assert.notNull(xhtml);
+        //todo more assertions
 
     }
 }

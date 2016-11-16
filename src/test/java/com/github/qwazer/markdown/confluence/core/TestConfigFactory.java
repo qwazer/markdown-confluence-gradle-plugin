@@ -2,10 +2,12 @@ package com.github.qwazer.markdown.confluence.core;
 
 import org.gradle.internal.impldep.org.apache.commons.codec.binary.Base64;
 
+import java.io.File;
+
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
  */
-public class ConfluenceConfigTestFactory {
+public class TestConfigFactory {
 
 
     public static  ConfluenceConfig testConfluenceConfig(){
@@ -16,6 +18,7 @@ public class ConfluenceConfigTestFactory {
         config.setConfluenceRestApiUrl("http://localhost:8090/rest/api/");
         config.setAuthentication(getAuth());
         config.setTitle("README.md");
+        config.setBaseFile(new File("README.md"));
         return  config;
     }
 

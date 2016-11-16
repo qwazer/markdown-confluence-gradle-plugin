@@ -15,17 +15,19 @@ import java.io.IOException;
 public class FileReaderServiceImpl implements FileReaderService {
     @Override
     public String readFile(ConfluenceConfig confluenceConfig) throws IOException {
-        String baseDir =  confluenceConfig.getBaseDir();
-        String baseFile =  confluenceConfig.getBaseFile();
 
         String content=null;
 
-        File file = baseDir==null || baseDir.isEmpty() ? new File(baseFile) : new File(baseDir, baseFile);
+        File file = confluenceConfig.getBaseFile();
         FileReader fileReader = new FileReader(file);
         char[] chars = new char[(int) file.length()];
-        fileReader.read(chars);
-        content = new String(chars);
-        fileReader.close();
+        try {
+            fileReader.read(chars);
+            content = new String(chars);
+        }
+        finally {
+            fileReader.close();
+        }
 
         return content;
 

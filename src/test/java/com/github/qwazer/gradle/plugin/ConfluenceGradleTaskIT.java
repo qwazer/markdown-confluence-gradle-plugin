@@ -1,11 +1,10 @@
 package com.github.qwazer.gradle.plugin;
 
+import com.github.qwazer.markdown.confluence.core.UrlChecker;
 import org.apache.commons.io.IOUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
@@ -19,7 +18,7 @@ import static org.gradle.testkit.runner.TaskOutcome.*;
 /**
  * Created by Anton Reshetnikov on 16 Nov 2016.
  */
-public class ConfluenceGradleTaskTest {
+public class ConfluenceGradleTaskIT {
 
     @Rule public final TemporaryFolder testProjectDir = new TemporaryFolder();
     private File buildFile;
@@ -32,8 +31,17 @@ public class ConfluenceGradleTaskTest {
         readmeFile = testProjectDir.newFile("README.md");
     }
 
+    @Before
+    public void pingRestAPIUrl(){
+        String url = "http://localhost:8090/rest/api";
+        Assume.assumeTrue( "Url should be available " + url ,
+                UrlChecker.pingConfluence(url, 200));
+    }
+
     @Test
+    @Ignore
     public void testConfluenceTask() throws IOException {
+
 
 
         String content = IOUtils.toString(this.getClass().getResource("/build.gradle.sample")) ;
