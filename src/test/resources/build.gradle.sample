@@ -1,0 +1,21 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:$VERSION'
+    }
+}
+
+apply plugin: 'com.github.qwazer.markdown-confluence'
+
+confluence {
+    ancestorId 95791817
+    authentication 'base64-encoded user:pass'
+    confluenceRestApiUrl 'https://confluence.acme.com/rest/api/'
+    spaceKey 'SAMPLE'
+    title 'projectName'
+    baseDir = ''
+    sslTrustAll true
+}

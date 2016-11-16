@@ -20,7 +20,7 @@ public class FileReaderServiceImpl implements FileReaderService {
 
         String content=null;
 
-        File file = new File(baseDir, baseFile);
+        File file = baseDir==null || baseDir.isEmpty() ? new File(baseFile) : new File(baseDir, baseFile);
         FileReader fileReader = new FileReader(file);
         char[] chars = new char[(int) file.length()];
         fileReader.read(chars);

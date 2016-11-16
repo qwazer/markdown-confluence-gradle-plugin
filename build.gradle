@@ -1,6 +1,6 @@
 
 group 'com.github.qwazer'
-version '0.1-SNAPSHOT'
+version "$VERSION"
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -23,9 +23,12 @@ dependencies {
     compile "org.jsoup:jsoup:$JSOUP_VERSION"
     compile "org.pegdown:pegdown:$PEGDOWN_VERSION"
 
-    testCompile "org.apache.logging.log4j:log4j-core:$LOG4J2_VERSION"
-    testCompile "org.apache.logging.log4j:log4j-slf4j-impl:$LOG4J2_VERSION"
 
+    testCompile gradleTestKit()
+
+//    testCompile "org.apache.logging.log4j:log4j-core:$LOG4J2_VERSION"
+//    testCompile "org.apache.logging.log4j:log4j-slf4j-impl:$LOG4J2_VERSION"
+    testCompile group: 'commons-io', name: 'commons-io', version: '2.4'
     testCompile "junit:junit:$JUNIT_VERSION"
     testCompile "org.mockito:mockito-core:$MOCKITO_VERSION"
     testCompile "org.springframework:spring-test:$SPRING_VERSION"
