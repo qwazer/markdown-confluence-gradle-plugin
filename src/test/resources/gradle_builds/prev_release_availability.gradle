@@ -1,9 +1,12 @@
 buildscript {
     repositories {
+        maven {
+            url "http://dl.bintray.com/qwazer/maven"
+        }
         jcenter()
     }
     dependencies {
-        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.1'
+        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.2-EAP01'
     }
 }
 
