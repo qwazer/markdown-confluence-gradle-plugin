@@ -1,4 +1,4 @@
-# gradle-markdown-confluence
+# markdown-confluence-gradle-plugin
 Gradle plugin to publish markdown pages to confluence 
 
 ## Usage and sample configuration
