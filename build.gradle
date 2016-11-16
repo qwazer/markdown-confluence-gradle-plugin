@@ -1,23 +1,18 @@
 buildscript {
     repositories {
-        mavenLocal()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
         jcenter()
-        mavenCentral()
     }
-    dependencies {
-        classpath 'org.apache.maven:maven-model:3.3.9'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.3"
-    }
+}
+
+plugins {
+    id "com.jfrog.bintray" version "1.7"
 }
 
 group 'com.github.qwazer'
 version "$VERSION"
 
 apply plugin: 'java'
+apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
@@ -47,32 +42,30 @@ dependencies {
 
 
 bintray {
-    user = "$System.env.BINTRAY_USER"
-    key = "$System.env.BINTRAY_PASS"
-    publications = ['myPublication']
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    publications = ['MyPublication']
     pkg {
-        version {
-            name = project.version
-        }
-        repo = "$System.env.BINTRAY_REPO"
+        repo = project.hasProperty('bintrayRepo') ? project.property('bintrayRepo') : System.getenv('BINTRAY_REPO')
         name = 'markdown-confluence-gradle-plugin'
-        userOrg = "$System.env.BINTRAY_USER"
+        userOrg = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin.git'
         websiteUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin'
         issueTrackerUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin/issues'
         labels = ['markdown','confluence']
-    }
-}
-
-publishing {
-    publications {
-        myPublication(MavenPublication) {
-            from components.java
+        version {
+            name = project.version
         }
     }
 }
 
-tasks.withType(JavaExec) {
-    systemProperties System.properties
+
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+        }
+    }
 }
