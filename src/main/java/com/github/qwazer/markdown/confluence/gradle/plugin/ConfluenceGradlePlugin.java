@@ -13,16 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qwazer.markdown.confluence.core.exception;
+package com.github.qwazer.markdown.confluence.gradle.plugin;
 
-public class ConfluenceAPIException extends RuntimeException {
+import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
+import org.gradle.api.Plugin;
+import org.gradle.api.Project;
 
-    public ConfluenceAPIException(String message) {
-        super(message);
-    }
+import java.util.HashMap;
+import java.util.Map;
 
-    public ConfluenceAPIException(String message, Throwable cause) {
-        super(message, cause);
+public class ConfluenceGradlePlugin implements Plugin<Project> {
+
+    @Override
+    public void apply(final Project project) {
+        project.getExtensions().create("confluence", ConfluenceConfig.class);
+
+        final Map<String, Object> options = new HashMap<>();
+        options.put("type", ConfluenceGradleTask.class);
+
+        project.task(options, "confluence");
     }
 
 }

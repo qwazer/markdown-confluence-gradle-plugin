@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qwazer.gradle.plugin;
+package com.github.qwazer.markdown.confluence.gradle.plugin;
 
-import com.github.qwazer.markdown.confluence.core.service.ConfluenceService;
 import com.github.qwazer.markdown.confluence.core.SpringConfig;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.ssl.SslUtil;
+import com.github.qwazer.markdown.confluence.core.service.ConfluenceService;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;

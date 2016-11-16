@@ -1,4 +1,4 @@
-package com.github.qwazer.markdown.confluence.core.service.impl;
+package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = SpringConfig.class)
-public class ConfluenceServiceImplTest {
+public class ConfluenceServiceTest {
 
     @Autowired
     private ConfluenceService confluenceService;

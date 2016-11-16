@@ -1,9 +1,9 @@
-package com.github.qwazer.markdown.confluence.core.service.impl;
+package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.UrlChecker;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
-import com.github.qwazer.markdown.confluence.core.service.Wiki2ConfluenceService;
+import com.github.qwazer.markdown.confluence.core.service.WikiToConfluenceService;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -15,14 +15,14 @@ import org.springframework.web.client.RestTemplate;
  */
 public class WikiToConfluenceServiceImplIT {
 
-    Wiki2ConfluenceService confluenceService;
+    WikiToConfluenceService confluenceService;
     ConfluenceConfig confluenceConfig;
 
 
     @Before
     public void setUp() throws Exception {
         RestTemplate restTemplate = new RestTemplate();
-        confluenceService = new WikiToConfluenceServiceImpl(restTemplate);
+        confluenceService = new WikiToConfluenceService(restTemplate);
         confluenceConfig = TestConfigFactory.testConfluenceConfig();
     }
 

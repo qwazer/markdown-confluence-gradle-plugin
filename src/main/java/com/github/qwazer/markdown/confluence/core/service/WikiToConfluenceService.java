@@ -1,10 +1,9 @@
-package com.github.qwazer.markdown.confluence.core.service.impl;
+package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.exception.ConfluenceAPIException;
+import com.github.qwazer.markdown.confluence.core.ConfluenceAPIException;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePageBuilder;
-import com.github.qwazer.markdown.confluence.core.service.Wiki2ConfluenceService;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import net.minidev.json.JSONArray;
@@ -33,9 +32,9 @@ import static org.jsoup.nodes.Entities.EscapeMode.xhtml;
  * Created by Anton Reshetnikov on 14 Nov 2016.
  */
 @Service
-public class WikiToConfluenceServiceImpl implements Wiki2ConfluenceService {
+public class WikiToConfluenceService  {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WikiToConfluenceServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WikiToConfluenceService.class);
 
     private static final String EXPAND = "expand";
     private static final String ID = "id";
@@ -47,11 +46,10 @@ public class WikiToConfluenceServiceImpl implements Wiki2ConfluenceService {
     private final RestTemplate restTemplate;
 
     @Autowired
-    public WikiToConfluenceServiceImpl(final RestTemplate restTemplate) {
+    public WikiToConfluenceService(final RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    @Override
     public void postWikiToConfluence(final ConfluenceConfig confluenceConfig, final String wiki) {
         LOG.info("Posting XHTML to Confluence...");
 

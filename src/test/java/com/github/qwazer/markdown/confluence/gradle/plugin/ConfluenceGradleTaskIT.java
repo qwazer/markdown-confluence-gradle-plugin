@@ -1,4 +1,4 @@
-package com.github.qwazer.gradle.plugin;
+package com.github.qwazer.markdown.confluence.gradle.plugin;
 
 import com.github.qwazer.markdown.confluence.core.UrlChecker;
 import org.apache.commons.io.IOUtils;
