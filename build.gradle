@@ -1,9 +1,25 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.apache.maven:maven-model:3.3.9'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.3"
+    }
+}
 
 group 'com.github.qwazer'
 version "$VERSION"
 
 apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 sourceCompatibility = 1.7
 
@@ -14,22 +30,49 @@ repositories {
 
 dependencies {
     compile gradleApi()
-
-    compile "org.slf4j:slf4j-api:$SLF4J_VERSION"
-
+    compile "org.slf4j:slf4j-api:1.7.19"
     compile "org.springframework:spring-core:$SPRING_VERSION"
     compile "org.springframework:spring-web:$SPRING_VERSION"
-    compile "com.jayway.jsonpath:json-path:$JSONPATH_VERSION"
-    compile "org.jsoup:jsoup:$JSOUP_VERSION"
-    compile "org.pegdown:pegdown:$PEGDOWN_VERSION"
+    compile "com.jayway.jsonpath:json-path:2.2.0"
+    compile "org.jsoup:jsoup:1.8.3"
+    compile "org.pegdown:pegdown:1.6.0"
 
 
     testCompile gradleTestKit()
-
-//    testCompile "org.apache.logging.log4j:log4j-core:$LOG4J2_VERSION"
-//    testCompile "org.apache.logging.log4j:log4j-slf4j-impl:$LOG4J2_VERSION"
-    testCompile group: 'commons-io', name: 'commons-io', version: '2.4'
-    testCompile "junit:junit:$JUNIT_VERSION"
-    testCompile "org.mockito:mockito-core:$MOCKITO_VERSION"
+    testCompile "commons-io:commons-io:2.4"
+    testCompile "junit:junit:4.12"
+    testCompile "org.mockito:mockito-core:1.10.19"
     testCompile "org.springframework:spring-test:$SPRING_VERSION"
+}
+
+
+bintray {
+    user = "$System.env.BINTRAY_USER"
+    key = "$System.env.BINTRAY_PASS"
+    publications = ['myPublication']
+    pkg {
+        version {
+            name = project.version
+        }
+        repo = "$System.env.BINTRAY_REPO"
+        name = 'markdown-confluence-gradle-plugin'
+        userOrg = "$System.env.BINTRAY_USER"
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin.git'
+        websiteUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin'
+        issueTrackerUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin/issues'
+        labels = ['markdown','confluence']
+    }
+}
+
+publishing {
+    publications {
+        myPublication(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+tasks.withType(JavaExec) {
+    systemProperties System.properties
 }
