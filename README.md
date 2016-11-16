@@ -39,10 +39,24 @@ confluence {
 
 ````
 
+### Description of config parameters
+
+parameter | datatype | optional | description
+------------ | -------------
+authentication | String | no | 'user:pass'.bytes.encodeBase64().toString()
+confluenceRestApiUrl | String | no |  confluence rest api url
+spaceKey | String | no |  space key
+parentPage | String | yes | if not specified will use space home as parent page 
+title | File | no | path to file with markdown file
+sslTrustAll | Boolean | yes |  ignore self-signed and unknown sertificate errors. Usefull in some corporate enviroments
 
 
-invoke new task ``confluence``
 
+
+### Run the build
+```
+gradle confluence
+```
 
 
 ## Thanks
