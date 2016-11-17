@@ -51,14 +51,12 @@ public class WikiToConfluenceService  {
     }
 
     public void postWikiToConfluence(final ConfluenceConfig confluenceConfig, final String wiki) {
-        LOG.info("Posting XHTML to Confluence...");
+        LOG.info("Posting Wiki to Confluence...");
 
-        CONFLUENCE_CONFIG.set(confluenceConfig);
-
+        CONFLUENCE_CONFIG.set(confluenceConfig);  //todo rewrite without ThreadLocal
 
 
         ConfluencePage confluencePage =  new ConfluencePage();
-
         confluencePage.setConfluenceTitle(confluenceConfig.getTitle());
         confluencePage.setContent(wiki);
 
@@ -75,6 +73,8 @@ public class WikiToConfluenceService  {
 
     protected Long findAncestorId(ConfluenceConfig confluenceConfig) {
 
+        LOG.debug("Try to find ancestorId ");
+
 
         final HttpHeaders httpHeaders = buildHttpHeaders(confluenceConfig.getAuthentication());
         final HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
@@ -85,6 +85,7 @@ public class WikiToConfluenceService  {
                 .queryParam(SPACE_KEY, confluenceConfig.getSpaceKey());
 
         if (confluenceConfig.getParentPage()!=null && !confluenceConfig.getParentPage().isEmpty()){
+            LOG.debug("Parent page is not provided, so try to find space home page as ancestorId");
             builder = builder.queryParam(TITLE, confluenceConfig.getParentPage());
         }
 
@@ -97,14 +98,14 @@ public class WikiToConfluenceService  {
 
         final String jsonBody = responseEntity.getBody();
 
-        LOG.debug("GET RESPONSE: {}", jsonBody);
+        LOG.debug("FindAncestorId response: {}", jsonBody);
 
         String id =null;
         try {
             id = JsonPath.read(jsonBody, "$.results[0].id");
         }
         catch (PathNotFoundException e){
-            //todo log
+            LOG.error("Cannot parse ancestorId from response {}", jsonBody);
             throw e;
         }
 
@@ -284,73 +285,6 @@ public class WikiToConfluenceService  {
 
         return jsonObject;
     }
-
-//    private static String reformatXHtml(final String inputXhtml, final Map<String, ConfluenceLink> confluenceLinkMap) {
-//        final Document document = Jsoup.parse(inputXhtml, "utf-8", Parser.xmlParser());
-//        document.outputSettings().prettyPrint(false);
-//        document.outputSettings().escapeMode(xhtml);
-//        document.outputSettings().charset("UTF-8");
-//
-//        final Elements linkElements = document.select("a");
-//
-//        for (final Element linkElement : linkElements) {
-//            final String originalHref = linkElement.attr("href");
-//            final ConfluenceLink confluenceLink = confluenceLinkMap.get(originalHref);
-//
-//            if (confluenceLink == null) {
-//                LOG.debug("NO LINK MAPPING FOUND TO COVERT LINK: {}", originalHref);
-//                continue;
-//            }
-//
-//            final String confluenceLinkMarkup = confluenceLink.getConfluenceLinkMarkup();
-//
-//            LOG.debug("LINK CONVERSION: {} -> {}", originalHref, confluenceLinkMarkup);
-//
-//            linkElement.before(confluenceLinkMarkup);
-//
-//            linkElement.html("");
-//            linkElement.unwrap();
-//        }
-//
-//        reformatXHtmlHeadings(document, "h2");
-//        reformatXHtmlHeadings(document, "h3");
-//        reformatXHtmlHeadings(document, "#toctitle");
-//
-//        final SwaggerConfluenceConfig swaggerConfluenceConfig = CONFLUENCE_CONFIG.get();
-//
-//        if(swaggerConfluenceConfig.getPaginationMode()==PaginationMode.SINGLE_PAGE){
-//            if(swaggerConfluenceConfig.isIncludeTableOfContentsOnSinglePage()) {
-//                reformatXHtmlBreakAfterElements(document, "#toc");
-//            }
-//
-//            reformatXHtmlBreakAfterElements(document, ".sect1");
-//        }
-//
-//        reformatXHtmlSpacing(document.select(".sect2"));
-//        reformatXHtmlSpacing(document.select(".sect3"));
-//
-//        return document.html();
-//    }
-//
-//    private static void reformatXHtmlHeadings(final Document document, final String selector){
-//        final Elements elements = document.select(selector);
-//
-//        for(final Element element : elements){
-//            final String text = element.text();
-//            final String strongHeaderText = String.format("<strong>%s</strong>", text);
-//            element.html(strongHeaderText);
-//        }
-//    }
-//
-//    private static void reformatXHtmlBreakAfterElements(final Document document, final String elements){
-//        document.select(elements).after("<br />");
-//    }
-//
-//    private static void reformatXHtmlSpacing(final Elements elements){
-//        for(final Element element : elements){
-//            element.before("<br />");
-//        }
-//    }
 
 
 }
