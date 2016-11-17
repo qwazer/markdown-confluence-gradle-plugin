@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
@@ -14,20 +16,8 @@ import java.io.IOException;
 public class FileReaderService  {
     public String readFile(ConfluenceConfig confluenceConfig) throws IOException {
 
-        String content=null;
-
         File file = confluenceConfig.getBaseFile();
-        FileReader fileReader = new FileReader(file);
-        char[] chars = new char[(int) file.length()];
-        try {
-            fileReader.read(chars);
-            content = new String(chars);
-        }
-        finally {
-            fileReader.close();
-        }
-
-        return content;
+        return new String(Files.readAllBytes(file.toPath()), Charset.forName("UTF-8"));
 
     }
 }
