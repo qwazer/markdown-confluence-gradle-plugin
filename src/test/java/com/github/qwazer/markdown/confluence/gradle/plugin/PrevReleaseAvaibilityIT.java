@@ -38,6 +38,7 @@ public class PrevReleaseAvaibilityIT {
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir.getRoot())
                 .withArguments("confluence")
+                .withDebug(true)
                 .buildAndFail();
         assertTrue(result.getOutput().contains("I/O error on GET request for"));
         assertEquals(result.task(":confluence").getOutcome(), FAILED);

@@ -8,17 +8,12 @@ Add next lines to ``build.gradle``
 ````
 buildscript {
     repositories {
-     
-        //repo with plugin
-        mavenLocal()
-
+        jcenter()
     }
     dependencies {
-        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.1-SNAPSHOT'
+        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.2-EAP01'
     }
 }
-
-apply plugin: 'com.github.qwazer.markdown-confluence'
 
 
 ````

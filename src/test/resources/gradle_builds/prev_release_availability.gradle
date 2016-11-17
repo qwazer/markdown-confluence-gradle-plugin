@@ -1,8 +1,8 @@
 buildscript {
     repositories {
-        maven {
-            url "http://dl.bintray.com/qwazer/maven"
-        }
+//        maven {
+//            url "http://dl.bintray.com/qwazer/maven"
+//        }
         jcenter()
     }
     dependencies {
