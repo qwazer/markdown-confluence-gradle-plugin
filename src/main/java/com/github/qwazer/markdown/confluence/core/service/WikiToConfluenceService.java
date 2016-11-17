@@ -56,16 +56,13 @@ public class WikiToConfluenceService  {
         CONFLUENCE_CONFIG.set(confluenceConfig);
 
 
-        Long ancestorId = findAncestorId(confluenceConfig);
 
         ConfluencePage confluencePage =  new ConfluencePage();
-        confluencePage.setAncestorId(ancestorId);
+
         confluencePage.setConfluenceTitle(confluenceConfig.getTitle());
         confluencePage.setContent(wiki);
 
-        LOG.debug("ANCESTOR ID SET: <{}> -> {}", confluencePage.getConfluenceTitle(), confluencePage.getAncestorId());
-
-        addExistensePageData(confluencePage);
+        findExistenceAndAncestorId(confluencePage);
 
         if (confluencePage.exists()) {
             updatePage(confluencePage);
@@ -126,9 +123,7 @@ public class WikiToConfluenceService  {
     }
 
 
-
-
-    private void addExistensePageData(final ConfluencePage confluencePage) {
+    protected void findExistenceAndAncestorId(final ConfluencePage confluencePage) {
         final ConfluenceConfig confluenceConfig = CONFLUENCE_CONFIG.get();
 
         final HttpHeaders httpHeaders = buildHttpHeaders(confluenceConfig.getAuthentication());
@@ -175,23 +170,9 @@ public class WikiToConfluenceService  {
 
             LOG.info("Page <{}> Does Not Exist, Creating a New Page!", confluencePage.getConfluenceTitle());
 
-            // Prevent New Pages from Being Orphaned if there was no ancestor id
-            // specified by querying for the id of the space root. Confluence
-            // does not do this automatically, and thus you would otherwise not be
-            // able to navigate to the page unless you manually knew the URL
-            if (confluencePage.getAncestorId() == null) {
-                final ConfluencePage spaceRootPage = ConfluencePageBuilder.aConfluencePage()
-                        .withConfluenceTitle(confluenceConfig.getSpaceKey())
-                        .build();
-                addExistensePageData(spaceRootPage);
 
-                final Long spaceRootAncestorId = Long.valueOf(spaceRootPage.getId());
-
-                LOG.info("ORPHAN PREVENTION FAIL SAFE: Using Space Root Ancestor Id {}",
-                        spaceRootAncestorId);
-
-                confluencePage.setAncestorId(spaceRootAncestorId);
-            }
+            Long ancestorId = findAncestorId(confluenceConfig);
+            confluencePage.setAncestorId(ancestorId);
         }
     }
 
