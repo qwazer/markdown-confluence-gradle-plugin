@@ -37,7 +37,7 @@ public class PrevReleaseAvaibilityIT {
         writeFile(readmeFile, "==hello");
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir.getRoot())
-                .withArguments("confluence")
+                .withArguments("confluence", "--info")
                 .withDebug(true)
                 .buildAndFail();
         assertTrue(result.getOutput().contains("I/O error on GET request for"));
