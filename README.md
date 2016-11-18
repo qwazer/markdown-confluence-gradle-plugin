@@ -5,7 +5,7 @@ Gradle plugin to publish markdown pages to confluence
 
 Add next lines to ``build.gradle`` 
 
-````
+```groovy
 buildscript {
     repositories {
         jcenter()
@@ -14,13 +14,11 @@ buildscript {
         classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.2-RC01'
     }
 }
-
-
-````
+```
 
 Sample config
 
-````
+```groovy
 confluence {
     authentication 'base64-encoded user:pass'
     confluenceRestApiUrl 'https://confluence.acme.com/rest/api/'
@@ -30,9 +28,7 @@ confluence {
     baseFile = file('README.md')
     sslTrustAll true
 }
-
-
-````
+```
 
 ### Description of config parameters
 
@@ -50,7 +46,7 @@ sslTrustAll | Boolean | yes |  ignore self-signed and unknown sertificate errors
 
 
 ### Run the build
-```
+```bash
 gradle confluence
 ```
 
