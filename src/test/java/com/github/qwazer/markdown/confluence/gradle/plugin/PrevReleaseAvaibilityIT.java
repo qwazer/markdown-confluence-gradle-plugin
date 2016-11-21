@@ -31,15 +31,17 @@ public class PrevReleaseAvaibilityIT {
 
 
     @Test
+    @Ignore
     public void testPrevReleaseAvailability() throws Exception {
         String content = IOUtils.toString(this.getClass().getResource("/gradle_builds/prev_release_availability.gradle")) ;
         writeFile(buildFile, content);
         writeFile(readmeFile, "==hello");
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir.getRoot())
-                .withArguments("confluence", "--info")
+                .withArguments("confluence", "--info", "--stacktrace")
                 .withDebug(true)
                 .buildAndFail();
+        System.out.println("result.getOutput() = " + result.getOutput());
         assertTrue(result.getOutput().contains("I/O error on GET request for"));
         assertEquals(result.task(":confluence").getOutcome(), FAILED);
 
