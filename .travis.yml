@@ -6,4 +6,5 @@ jdk:
   - openjdk6
 
 install: echo "skip 'gradle assemble' step"
-script: gradle classes
+script:
+   - ./gradlew classes
