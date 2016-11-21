@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/qwazer/markdown-confluence-gradle-plugin.svg?branch=master)](https://travis-ci.org/qwazer/markdown-confluence-gradle-plugin)
+
 # markdown-confluence-gradle-plugin
 Gradle plugin to publish markdown pages to confluence 
 
@@ -24,7 +26,7 @@ confluence {
     confluenceRestApiUrl 'https://confluence.acme.com/rest/api/'
     spaceKey 'SAMPLE'
     parentPage 'Home'
-    title $projectName
+    title 'myTitle'
     baseFile = file('README.md')
     sslTrustAll true
     pageVariables = ['project.name' : project.name, key2: 'value2']
