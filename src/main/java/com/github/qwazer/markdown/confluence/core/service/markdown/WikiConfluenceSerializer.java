@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -20,6 +21,8 @@ import static java.lang.String.format;
  */
 public abstract class WikiConfluenceSerializer implements Visitor {
 
+
+
     //list level
     private int listLevel = 0;
 
@@ -29,6 +32,13 @@ public abstract class WikiConfluenceSerializer implements Visitor {
     private StringBuilder _buffer = new StringBuilder( 500 * 1024 );
 
     private final java.util.Stack<Node> nodeStack = new java.util.Stack<Node>();
+
+
+    private final Map<String,String> replaceMap;
+
+    public WikiConfluenceSerializer(Map<String, String> replaceMap) {
+        this.replaceMap = replaceMap;
+    }
 
     public static int extensions() {
 
@@ -104,6 +114,18 @@ public abstract class WikiConfluenceSerializer implements Visitor {
     }
 
     protected abstract void notImplementedYet( Node node );
+
+
+    protected String replaceProperties(String input) {
+        if (input == null || replaceMap ==null || replaceMap.isEmpty()){
+            return input;
+        }
+        for (String key : replaceMap.keySet()) {
+            input = input.replace("${" + key + "}", replaceMap.get(key));
+        }
+        return input;
+
+    }
 
     protected StringBuilder bufferVisit( F<Void,Void> closure  ) {
 
@@ -341,7 +363,7 @@ public abstract class WikiConfluenceSerializer implements Visitor {
 
     @Override
     public void visit(TextNode tn) {
-        _buffer.append( tn.getText() );
+        _buffer.append( replaceProperties(tn.getText())       );
     }
 
     @Override
@@ -444,7 +466,7 @@ public abstract class WikiConfluenceSerializer implements Visitor {
 
             @Override
             public boolean f(TextNode node, Node parent, int index) {
-                alt.add(node.getText());
+                alt.add(replaceProperties(node.getText()));
                 return true;
             }
         });
@@ -466,7 +488,7 @@ public abstract class WikiConfluenceSerializer implements Visitor {
 
             @Override
             public boolean f(TextNode node, Node parent, int index) {
-                alt.add(node.getText());
+                alt.add(replaceProperties(node.getText()));
                 return true;
             }
         });
@@ -625,12 +647,12 @@ public abstract class WikiConfluenceSerializer implements Visitor {
 
     @Override
     public void visit(AnchorLinkNode aln) {
-        _buffer.append( aln.getText() );
+        _buffer.append( replaceProperties(aln.getText()) );
     }
 
     @Override
     public void visit(SpecialTextNode stn) {
-        _buffer.append(stn.getText());
+        _buffer.append(replaceProperties(stn.getText()));
     }
 
 

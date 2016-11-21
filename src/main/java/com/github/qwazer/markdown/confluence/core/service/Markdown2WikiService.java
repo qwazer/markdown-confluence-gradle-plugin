@@ -1,5 +1,6 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
+import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.service.markdown.WikiConfluenceSerializer;
 import org.pegdown.PegDownProcessor;
 import org.pegdown.ast.Node;
@@ -14,11 +15,11 @@ public class Markdown2WikiService  {
 
     final PegDownProcessor pegDownProcessor = new PegDownProcessor(WikiConfluenceSerializer.extensions());
 
-    public String convertMarkdown2Wiki(final String s) {
+    public String convertMarkdown2Wiki(final String s, ConfluenceConfig confluenceConfig) {
 
         final RootNode root = pegDownProcessor.parseMarkdown(s.toCharArray());
 
-        WikiConfluenceSerializer ser =  new WikiConfluenceSerializer() {
+        WikiConfluenceSerializer ser =  new WikiConfluenceSerializer(confluenceConfig.getPageVariables()) {
 
             @Override
             protected void notImplementedYet(Node node) {

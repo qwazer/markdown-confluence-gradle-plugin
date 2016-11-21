@@ -28,7 +28,7 @@ public class ConfluenceService {
 
     public void processAll(ConfluenceConfig confluenceConfig) throws IOException {
         String plainFileContent = fileReaderService.readFile(confluenceConfig);
-        String wikiText = markdown2WikiService.convertMarkdown2Wiki(plainFileContent);
+        String wikiText = markdown2WikiService.convertMarkdown2Wiki(plainFileContent,confluenceConfig);
         wiki2ConfluenceService.postWikiToConfluence(confluenceConfig, wikiText);
     }
 }

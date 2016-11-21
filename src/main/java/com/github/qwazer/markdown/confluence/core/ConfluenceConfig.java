@@ -2,6 +2,7 @@ package com.github.qwazer.markdown.confluence.core;
 
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Created by Anton Reshetnikov on 10 Nov 2016.
@@ -15,6 +16,8 @@ public class ConfluenceConfig {
     private String spaceKey;
     private String title;
     private boolean sslTrustAll = false;
+    private Map<String,String> pageVariables;
+
 
 
     public File getBaseFile() {
@@ -71,5 +74,13 @@ public class ConfluenceConfig {
 
     public void setParentPage(String parentPage) {
         this.parentPage = parentPage;
+    }
+
+    public Map<String, String> getPageVariables() {
+        return pageVariables;
+    }
+
+    public void setPageVariables(Map<String, String> pageVariables) {
+        this.pageVariables = pageVariables;
     }
 }

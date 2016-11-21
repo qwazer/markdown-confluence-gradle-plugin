@@ -18,4 +18,5 @@ confluence {
     title 'projectName'
     baseFile = file('README.md')
     sslTrustAll true
+    pageVariables = ['project.name': project.name]
 }

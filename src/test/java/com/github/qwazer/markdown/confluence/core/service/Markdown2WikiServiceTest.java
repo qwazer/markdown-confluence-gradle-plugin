@@ -1,8 +1,14 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
-import com.github.qwazer.markdown.confluence.core.service.Markdown2WikiService;
+import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
+import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
+import org.gradle.internal.impldep.com.amazonaws.util.StringMapBuilder;
 import org.junit.Test;
-import org.springframework.util.Assert;
+
+import java.util.Map;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
@@ -10,17 +16,49 @@ import org.springframework.util.Assert;
 public class Markdown2WikiServiceTest {
 
 
+    private Markdown2WikiService markdown2XtmlService = new Markdown2WikiService();
+    private ConfluenceConfig confluenceConfig = TestConfigFactory.testConfluenceConfig();
+
+
     @Test
-    public void testSimple() throws Exception {
-        Markdown2WikiService  markdown2XtmlService = new Markdown2WikiService();
+    public void testReplaceProperties() throws Exception {
 
-        String s = "# gradle-markdown-confluence\n" +
+        String content = "# ${project.name} \n" +
                 "Gradle plugin to publish markdown pages to confluence ```` java code;```` _italic_";
+        String projectName = "HELLO_PROJECT";
+        String key = "project.name";
+        assertTrue(content.contains("${"+key +"}"));
+        assertFalse(content.contains(projectName));
 
-        String xhtml = markdown2XtmlService.convertMarkdown2Wiki(s);
+        Map<String,String>  stringMap = new StringMapBuilder(key,projectName).build();
 
-        Assert.notNull(xhtml);
-        //todo more assertions
+        confluenceConfig.setPageVariables(stringMap);
+
+        String wiki = markdown2XtmlService.convertMarkdown2Wiki(content, confluenceConfig);
+
+        assertFalse(wiki.contains("${"+key +"}"));
+        assertTrue(wiki.contains(projectName));
+
+    }
+
+    @Test
+    public void testNotReplacePropertiesInCode() throws Exception {
+
+        String content = "# ${project.name} \n" +
+                "Gradle plugin to publish markdown pages to confluence ```java \n${java.code};\n``` _italic_";
+        String key = "java.code";
+        String value = "String s = new String()";
+        assertTrue(content.contains("${"+key +"}"));
+        assertFalse(content.contains(value));
+
+        Map<String,String>  stringMap = new StringMapBuilder(key,value).build();
+
+        confluenceConfig.setPageVariables(stringMap);
+
+        String wiki = markdown2XtmlService.convertMarkdown2Wiki(content, confluenceConfig);
+
+        assertTrue(wiki.contains("${"+key +"}"));
+        assertFalse(wiki.contains(value));
 
     }
 }

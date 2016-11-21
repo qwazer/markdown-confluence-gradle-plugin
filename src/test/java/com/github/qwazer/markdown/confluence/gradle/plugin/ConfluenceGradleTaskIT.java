@@ -32,7 +32,7 @@ public class ConfluenceGradleTaskIT {
         readmeFile = testProjectDir.newFile("README.md");
     }
 
-   // @Before
+    @Before
     public void pingRestAPIUrl(){
         String url = "http://localhost:8090/rest/api";
         Assume.assumeTrue( "Url should be available " + url ,
@@ -46,7 +46,7 @@ public class ConfluenceGradleTaskIT {
         String version = readCurrentVerion();
         content = content.replaceAll("\\$VERSION", version);
         writeFile(buildFile, content);
-        writeFile(readmeFile, "==hello");
+        writeFile(readmeFile, "#hello \n${project.name}");
 
 
         BuildResult result = GradleRunner.create()

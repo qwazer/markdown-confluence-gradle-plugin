@@ -27,6 +27,7 @@ confluence {
     title $projectName
     baseFile = file('README.md')
     sslTrustAll true
+    pageVariables = ['project.name' : project.name, key2: 'value2']
 }
 ```
 
@@ -41,6 +42,7 @@ spaceKey | String | no |  space key
 parentPage | String | yes | if not specified will use space home as parent page 
 title | File | no | path to file with markdown file
 sslTrustAll | Boolean | yes |  ignore self-signed and unknown sertificate errors. Usefull in some corporate enviroments
+pageVariables | Map<String,String> | yes | map of page variables, for example ```${project.name}``` in text or headers blocks of markdown page can be resolved to actual project.name . Variables inside code blocks keeps untouched.
 
 
 
