@@ -3,11 +3,21 @@ package com.github.qwazer.markdown.confluence.core;
 import org.gradle.internal.impldep.org.apache.commons.codec.binary.Base64;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
  */
 public class TestConfigFactory {
+
+
+
+    public static ConfluenceConfig.Page getPage(){
+        ConfluenceConfig.Page page = new ConfluenceConfig.Page();
+        page.baseFile(new File("README.md"));
+        page.setTitle("README.md");
+        return page;
+    }
 
 
     public static  ConfluenceConfig testConfluenceConfig(){
@@ -18,6 +28,8 @@ public class TestConfigFactory {
         config.setAuthentication(getAuth());
         config.setTitle("README.md");
         config.setBaseFile(new File("README.md"));
+        config.setPages(new ArrayList<ConfluenceConfig.Page>());
+        config.getPages().add(getPage());
         return  config;
     }
 

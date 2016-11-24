@@ -17,14 +17,19 @@ package com.github.qwazer.markdown.confluence.gradle.plugin;
 
 import com.github.qwazer.markdown.confluence.core.SpringConfig;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.service.ConfluenceService;
+import com.github.qwazer.markdown.confluence.core.service.MainService;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static com.github.qwazer.markdown.confluence.core.ssl.SslUtil.sslTrustAll;
 
@@ -34,16 +39,50 @@ public class ConfluenceGradleTask extends DefaultTask {
     public void confluence() throws NoSuchAlgorithmException, KeyManagementException, IOException {
         final AnnotationConfigApplicationContext annotationConfigApplicationContext =
                 new AnnotationConfigApplicationContext(SpringConfig.class);
-        final ConfluenceService confluenceService = annotationConfigApplicationContext
-                .getBean(ConfluenceService.class);
+        final MainService mainService = annotationConfigApplicationContext
+                .getBean(MainService.class);
 
         final ConfluenceConfig confluenceConfig = getProject().getExtensions().findByType(ConfluenceConfig.class);
+
+        validate(confluenceConfig);
+
         if (confluenceConfig.isSslTrustAll()){
             sslTrustAll();
         }
 
-        confluenceService.processAll(confluenceConfig);
+        mainService.processAll(confluenceConfig);
         annotationConfigApplicationContext.close();
+    }
+
+
+    protected static void validate(ConfluenceConfig config){
+        Assert.notNull(config);
+        Assert.hasLength(config.getConfluenceRestApiUrl());
+        Assert.hasLength(config.getSpaceKey());
+        Assert.notNull(config.getPages());
+
+        for (ConfluenceConfig.Page page :config.getPages()){
+            Assert.hasLength(page.getParentPage());
+            Assert.hasLength(page.getTitle());
+            Assert.notNull(page.getBaseFile());
+        }
+        validateNoDuplicates(config.getPages());
+    }
+
+    protected static void validateNoDuplicates(Collection<ConfluenceConfig.Page> pages) {
+
+        Set<ConfluenceConfig.Page> set = new TreeSet<>(new Comparator<ConfluenceConfig.Page>() {
+            @Override
+            public int compare(ConfluenceConfig.Page o1, ConfluenceConfig.Page o2) {
+                return o1.getTitle().compareTo(o2.getTitle());
+            }
+        });
+
+        set.addAll(pages);
+
+        if (set.size() < pages.size()) {
+            throw new IllegalArgumentException("Found duplicate pageTitle in confluence pages");
+        }
     }
 
 }

@@ -36,7 +36,7 @@ public class ConfluenceGradleTaskIT {
     public void pingRestAPIUrl(){
         String url = "http://localhost:8090/rest/api";
         Assume.assumeTrue( "Url should be available " + url ,
-                UrlChecker.pingConfluence(url, 200));
+                UrlChecker.pingConfluence(url, 500));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class ConfluenceGradleTaskIT {
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir.getRoot())
-                .withArguments("confluence")
+                .withArguments("confluence", "--info", "--stacktrace")
                 .withDebug(true)
                 .build();
 
