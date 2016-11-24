@@ -53,10 +53,11 @@ confluenceRestApiUrl | String | no |  confluence rest api url
 spaceKey | String | no |  space key
 sslTrustAll | Boolean | yes |  ignore self-signed and unknown sertificate errors. Usefull in some corporate enviroments
 pageVariables | Map<String,String> | yes | map of page variables, for example ```${project.name}``` will substituted by value of variable
-pages | Closure | no | Collection of Page Closures
+pages | Closure | no | Collection of Page Closures. If this config contain several pages, these will be ordered according their parent-child relationship
 page.parentPage  | String | no | Parent page title, will use to resovle actual page ancestorId  against Confluence instance
 page.title  | String | no | page title
 page.baseFile  | File | no | page content
+
 
 
 
