@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNotNull;
 public class WikiToConfluenceServiceImplIT {
 
     @Autowired
-    private WikiToConfluenceService confluenceService;
+    private WikiToConfluenceService wikiToConfluenceService;
     private final ConfluenceConfig confluenceConfig = TestConfigFactory.testConfluenceConfig();
     private final ConfluenceConfig.Page page = TestConfigFactory.getPage();
 
@@ -39,23 +39,15 @@ public class WikiToConfluenceServiceImplIT {
     @Ignore
     public void testExistenseOfConfluence() throws Exception {
 
-        confluenceService.postWikiPageToConfluence(page, confluenceConfig, "test");
+        wikiToConfluenceService.postWikiPageToConfluence(page, confluenceConfig, "test");
     }
 
     @Test
     @Ignore
     public void testSimple() throws Exception {
-        confluenceService.postWikiPageToConfluence(page, confluenceConfig, "h1.gradle-markdown-confluence\n" +
+        wikiToConfluenceService.postWikiPageToConfluence(page, confluenceConfig, "h1.gradle-markdown-confluence\n" +
                 "\n" +
                 "Gradle plugin to publish markdown pages to confluence {code:java} java code;{code} _italic_");
     }
 
-
-    @Test
-    public void testFindAncestorId() throws Exception {
-        confluenceConfig.setParentPage("SN+Home");
-        Long id = confluenceService.findAncestorId(confluenceConfig);
-        assertNotNull(id);
-
-    }
 }

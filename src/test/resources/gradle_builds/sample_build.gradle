@@ -19,14 +19,14 @@ confluence {
 
     pages {
         page {
+            parentPage  'projectName'
+            title "projectName-${project.version}"
+            baseFile  file('README.md')
+        }
+        page {
             parentPage = 'Home'
             title = 'projectName'
             baseFile = file('README.md')
-        }
-        page {
-            parentPage  'projectName'
-            title "projectName2-${project.version}"
-            baseFile  file('README.md')
         }
     }
 }

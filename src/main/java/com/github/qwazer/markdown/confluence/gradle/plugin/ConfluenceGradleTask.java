@@ -17,7 +17,7 @@ package com.github.qwazer.markdown.confluence.gradle.plugin;
 
 import com.github.qwazer.markdown.confluence.core.SpringConfig;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.service.ConfluenceService;
+import com.github.qwazer.markdown.confluence.core.service.MainService;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -39,8 +39,8 @@ public class ConfluenceGradleTask extends DefaultTask {
     public void confluence() throws NoSuchAlgorithmException, KeyManagementException, IOException {
         final AnnotationConfigApplicationContext annotationConfigApplicationContext =
                 new AnnotationConfigApplicationContext(SpringConfig.class);
-        final ConfluenceService confluenceService = annotationConfigApplicationContext
-                .getBean(ConfluenceService.class);
+        final MainService mainService = annotationConfigApplicationContext
+                .getBean(MainService.class);
 
         final ConfluenceConfig confluenceConfig = getProject().getExtensions().findByType(ConfluenceConfig.class);
 
@@ -50,7 +50,7 @@ public class ConfluenceGradleTask extends DefaultTask {
             sslTrustAll();
         }
 
-        confluenceService.processAll(confluenceConfig);
+        mainService.processAll(confluenceConfig);
         annotationConfigApplicationContext.close();
     }
 
@@ -62,7 +62,7 @@ public class ConfluenceGradleTask extends DefaultTask {
         Assert.notNull(config.getPages());
 
         for (ConfluenceConfig.Page page :config.getPages()){
-          //  Assert.hasLength(page.getParentPage());
+            Assert.hasLength(page.getParentPage());
             Assert.hasLength(page.getTitle());
             Assert.notNull(page.getBaseFile());
         }
