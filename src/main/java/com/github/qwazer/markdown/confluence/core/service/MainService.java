@@ -17,15 +17,15 @@ public class MainService {
 
     private final FileReaderService fileReaderService;
     private final Markdown2WikiService markdown2WikiService;
-    private final WikiToConfluenceService wiki2ConfluenceService;
+    private final PageService pageService;
 
     @Autowired
     public MainService(FileReaderService fileReaderService,
                        Markdown2WikiService markdown2WikiService,
-                       WikiToConfluenceService wiki2ConfluenceService) {
+                       PageService pageService) {
         this.fileReaderService = fileReaderService;
         this.markdown2WikiService = markdown2WikiService;
-        this.wiki2ConfluenceService = wiki2ConfluenceService;
+        this.pageService = pageService;
     }
 
     public void processAll(ConfluenceConfig confluenceConfig) throws IOException {
@@ -34,7 +34,7 @@ public class MainService {
         for (Page page : orderedList) {
             String plainFileContent = fileReaderService.readFile(page);
             String wikiText = markdown2WikiService.convertMarkdown2Wiki(plainFileContent, confluenceConfig);
-            wiki2ConfluenceService.postWikiPageToConfluence(page, confluenceConfig, wikiText);
+            pageService.postWikiPageToConfluence(page, confluenceConfig, wikiText);
         }
     }
 

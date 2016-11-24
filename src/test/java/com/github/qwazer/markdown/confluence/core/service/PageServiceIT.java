@@ -20,10 +20,10 @@ import static org.junit.Assert.assertNotNull;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = SpringConfig.class)
-public class WikiToConfluenceServiceImplIT {
+public class PageServiceIT {
 
     @Autowired
-    private WikiToConfluenceService wikiToConfluenceService;
+    private PageService pageService;
     private final ConfluenceConfig confluenceConfig = TestConfigFactory.testConfluenceConfig();
     private final ConfluenceConfig.Page page = TestConfigFactory.getPage();
 
@@ -39,13 +39,13 @@ public class WikiToConfluenceServiceImplIT {
     @Ignore
     public void testExistenseOfConfluence() throws Exception {
 
-        wikiToConfluenceService.postWikiPageToConfluence(page, confluenceConfig, "test");
+        pageService.postWikiPageToConfluence(page, confluenceConfig, "test");
     }
 
     @Test
     @Ignore
     public void testSimple() throws Exception {
-        wikiToConfluenceService.postWikiPageToConfluence(page, confluenceConfig, "h1.gradle-markdown-confluence\n" +
+        pageService.postWikiPageToConfluence(page, confluenceConfig, "h1.gradle-markdown-confluence\n" +
                 "\n" +
                 "Gradle plugin to publish markdown pages to confluence {code:java} java code;{code} _italic_");
     }
