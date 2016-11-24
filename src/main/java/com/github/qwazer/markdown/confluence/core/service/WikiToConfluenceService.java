@@ -50,14 +50,14 @@ public class WikiToConfluenceService  {
         this.restTemplate = restTemplate;
     }
 
-    public void postWikiToConfluence(final ConfluenceConfig confluenceConfig, final String wiki) {
+    public void postWikiPageToConfluence(final ConfluenceConfig.Page page, final ConfluenceConfig confluenceConfig, final String wiki) {
         LOG.info("Posting Wiki to Confluence...");
 
         CONFLUENCE_CONFIG.set(confluenceConfig);  //todo rewrite without ThreadLocal
 
 
         ConfluencePage confluencePage =  new ConfluencePage();
-        confluencePage.setConfluenceTitle(confluenceConfig.getTitle());
+        confluencePage.setConfluenceTitle(page.getTitle());
         confluencePage.setContent(wiki);
 
         findExistenceAndAncestorId(confluencePage);

@@ -14,9 +14,9 @@ import java.nio.file.Files;
  */
 @Service
 public class FileReaderService  {
-    public String readFile(ConfluenceConfig confluenceConfig) throws IOException {
+    public String readFile(ConfluenceConfig.Page page) throws IOException {
 
-        File file = confluenceConfig.getBaseFile();
+        File file = page.getBaseFile();
         return new String(Files.readAllBytes(file.toPath()), Charset.forName("UTF-8"));
 
     }
