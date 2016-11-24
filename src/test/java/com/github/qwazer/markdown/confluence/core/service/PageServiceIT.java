@@ -32,7 +32,7 @@ public class PageServiceIT {
     public void pingRestAPIUrl(){
         String url = TestConfigFactory.testConfluenceConfig().getConfluenceRestApiUrl();
         Assume.assumeTrue( "Url should be available " + url ,
-                UrlChecker.pingConfluence(url, 200));
+                UrlChecker.pingConfluence(url, 500));
     }
 
     @Test

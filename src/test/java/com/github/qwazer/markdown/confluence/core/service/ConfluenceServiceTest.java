@@ -3,6 +3,9 @@ package com.github.qwazer.markdown.confluence.core.service;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.SpringConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
+import com.github.qwazer.markdown.confluence.core.UrlChecker;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,13 @@ public class ConfluenceServiceTest {
     private ConfluenceService confluenceService;
     private final ConfluenceConfig confluenceConfig = TestConfigFactory.testConfluenceConfig();
     private final ConfluenceConfig.Page page = TestConfigFactory.getPage();
+
+    @Before
+    public void pingRestAPIUrl(){
+        String url = TestConfigFactory.testConfluenceConfig().getConfluenceRestApiUrl();
+        Assume.assumeTrue( "Url should be available " + url ,
+                UrlChecker.pingConfluence(url, 500));
+    }
 
     @Test
     public void testFindAncestorId() throws Exception {
