@@ -3,6 +3,7 @@ package com.github.qwazer.markdown.confluence.core.service;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
 import org.gradle.internal.impldep.com.amazonaws.util.StringMapBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -57,8 +58,8 @@ public class Markdown2WikiServiceTest {
 
         String wiki = markdown2XtmlService.convertMarkdown2Wiki(content, confluenceConfig);
 
-        assertTrue(wiki.contains("${"+key +"}"));
-        assertFalse(wiki.contains(value));
+        assertFalse(wiki.contains("${"+key +"}"));
+        assertTrue(wiki.contains(value));
 
     }
 }

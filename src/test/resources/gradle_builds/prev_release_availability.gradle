@@ -15,15 +15,15 @@ apply plugin: 'com.github.qwazer.markdown-confluence'
 confluence {
 
     authentication 'admin:admin'.bytes.encodeBase64().toString()
-    confluenceRestApiUrl 'https://acme.com:8090/rest/api/'
+    restApiUrl 'https://acme.com:8090/rest/api/'
     spaceKey 'SAMPLE'
     sslTrustAll true
 
     pages {
         page {
-            parentPage 'Home'
+            parentTitle 'Home'
             title 'projectName'
-            baseFile = file('README.md')
+            srcFile = file('README.md')
         }
     }
 }

@@ -140,7 +140,7 @@ public class ConfluenceConfig {
             }
         }
 
-        public void baseFile(File baseFile) {
+        public void srcFile(File baseFile) {
             this.srcFile = baseFile;
         }
 
@@ -154,5 +154,15 @@ public class ConfluenceConfig {
         }
     }
 
-
+    @Override
+    public String toString() {
+        return "ConfluenceConfig{" +
+                "authentication='" + authentication + '\'' +
+                ", restApiUrl='" + restApiUrl + '\'' +
+                ", spaceKey='" + spaceKey + '\'' +
+                ", sslTrustAll=" + sslTrustAll +
+                ", pageVariables=" + pageVariables +
+                ", pages=" + pages +
+                '}';
+    }
 }

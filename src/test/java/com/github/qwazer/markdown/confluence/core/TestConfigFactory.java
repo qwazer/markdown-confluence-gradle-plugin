@@ -14,7 +14,7 @@ public class TestConfigFactory {
 
     public static ConfluenceConfig.Page getPage(){
         ConfluenceConfig.Page page = new ConfluenceConfig.Page();
-        page.baseFile(new File("README.md"));
+        page.setSrcFile(new File("README.md"));
         page.setTitle("README.md");
         return page;
     }
