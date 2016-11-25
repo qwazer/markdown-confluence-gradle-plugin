@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 
+import java.util.*;
+
 /**
  * Created by Anton Reshetnikov on 14 Nov 2016.
  */
@@ -40,6 +42,7 @@ public class PageService {
                 oldPage.setTitle(page.getTitle());
                 oldPage.setLabels(page.getLabels());
                 confluenceService.updatePage(oldPage);
+                confluenceService.addLabels(oldPage.getId(), page.getLabels());
 
             } else {
                 LOG.info("Create new page");
@@ -50,12 +53,36 @@ public class PageService {
                 Long ancestorId = confluenceService.findAncestorId(page.getParentTitle());
                 newPage.setAncestorId(ancestorId);
 
-                confluenceService.createPage(newPage);
+                Long pageId = confluenceService.createPage(newPage);
+
+                confluenceService.addLabels(pageId, page.getLabels());
             }
         } catch (HttpStatusCodeException e) {
             throw new ConfluenceException(e.getResponseBodyAsString(), e);
         }
 
+    }
+
+
+    public <T> List<T> union(Collection<T> list1, Collection<T> list2) {
+        Set<T> set = new HashSet<T>();
+
+        set.addAll(list1);
+        set.addAll(list2);
+
+        return new ArrayList<T>(set);
+    }
+
+    public <T> List<T> intersection(Collection<T> list1, Collection<T> list2) {
+        List<T> list = new ArrayList<T>();
+
+        for (T t : list1) {
+            if(list2.contains(t)) {
+                list.add(t);
+            }
+        }
+
+        return list;
     }
 
 

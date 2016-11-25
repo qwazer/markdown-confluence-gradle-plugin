@@ -11,7 +11,7 @@ public class ConfluencePage {
 
     private Long ancestorId;
     private String title;
-    private String id;
+    private Long id;
     private Integer version;
     private String content;
     private Collection<String> labels;
@@ -32,11 +32,11 @@ public class ConfluencePage {
         this.title = title;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

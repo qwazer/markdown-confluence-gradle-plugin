@@ -1,11 +1,14 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
+import com.github.qwazer.markdown.confluence.core.ConfluenceException;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +18,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
+
+import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
 
 /**
  * Created by Anton Reshetnikov on 24 Nov 2016.
@@ -118,7 +122,7 @@ public class ConfluenceService {
 
     }
 
-    public void createPage(final ConfluencePage page) {
+    public Long createPage(final ConfluencePage page) {
         final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
                 .path("/content")
                 .build()
@@ -135,6 +139,89 @@ public class ConfluenceService {
 
         LOG.debug("Response of creating page: {}", responseEntity.getBody());
 
+        return parsePageIdFromResponse(responseEntity);
+
+    }
+
+
+    public List<String> getLabels(Long pageId){
+        URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
+                .path("/content/{id}/label")
+                .queryParam("prefix", "global")
+                .buildAndExpand(pageId)
+                .toUri();
+
+        LOG.debug("Request of get labels: {}", pageId);
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
+                HttpMethod.GET, requestEntity, String.class);
+
+
+       return parseLabels(requestEntity);
+
+    }
+
+    protected static List<String> parseLabels(HttpEntity<String> requestEntity) {
+        String jsonBody = requestEntity.getBody();
+        ArrayList<String> res = new ArrayList<>();
+        try {
+            final JSONArray jsonArray = JsonPath.read(jsonBody, "$.results");
+
+            for (Object labelJson : jsonArray) {
+                res.add(JsonPath.read(labelJson, "name").toString());
+            }
+        }
+        catch (PathNotFoundException e){
+            LOG.warn("cannot parse label value from json {}" , jsonBody );
+        }
+
+        return res;
+
+    }
+
+
+    public void addLabels(Long pageId, Collection<String> labels){
+        URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
+                .path("/content/{id}/label")
+                .buildAndExpand(pageId)
+                .toUri();
+
+        final String jsonPostBody = buildAddLabelsPostBody(labels);
+
+        LOG.debug("Request of adding labels: {}", jsonPostBody);
+        HttpEntity<String> requestEntity = new HttpEntity<>(jsonPostBody, httpHeaders);
+        HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
+                HttpMethod.POST, requestEntity, String.class);
+        LOG.debug("Response of adding labels: {}", responseEntity.getBody());
+
+    }
+
+    public void deleteLabelByName(Long pageId, String name){
+        URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
+                .path("/content/{id}/label")
+                .queryParam("name", name)
+                .buildAndExpand(pageId)
+                .toUri();
+
+
+
+        LOG.debug("Request of delete labels of page: {}", pageId);
+        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+        HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
+                HttpMethod.DELETE, requestEntity, String.class);
+
+    }
+
+    private static String buildAddLabelsPostBody(Collection<String> labels) {
+        if (labels==null || labels.isEmpty()) return null;
+        JSONArray jsonArray = new JSONArray();
+        for (String s : labels){
+            JSONObject label = new JSONObject();
+            label.put("prefix", "global");
+            label.put("name", s);
+            jsonArray.add(label);
+        }
+        return jsonArray.toJSONString();
     }
 
 
@@ -161,7 +248,7 @@ public class ConfluenceService {
                 confluencePage.setAncestorId(ancestorId);
             }
 
-            confluencePage.setId(id);
+            confluencePage.setId(Long.parseLong(id));
             confluencePage.setVersion(version);
 
             return confluencePage;
@@ -212,13 +299,25 @@ public class ConfluenceService {
 
         ConfluencePage page = findPageByTitle(title);
         if (page != null) {
-            return Long.parseLong(page.getId());
+            return page.getId();
         } else {
             LOG.info("Try to use page home id as ancestorId", confluenceConfig.getSpaceKey());
 
             ConfluencePage spaceHome = findSpaceHomePage(confluenceConfig.getSpaceKey());
-            return Long.parseLong(spaceHome.getId());
+            return spaceHome.getId();
         }
 
+    }
+
+    private static Long parsePageIdFromResponse(final HttpEntity<String> responseEntity) {
+        final String responseJson = responseEntity.getBody();
+        final JSONParser jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
+
+        try {
+            final JSONObject response = jsonParser.parse(responseJson, JSONObject.class);
+            return Long.valueOf((String) response.get(ID));
+        } catch (ParseException e) {
+            throw new ConfluenceException("Error Parsing JSON Response from Confluence!", e);
+        }
     }
 }
