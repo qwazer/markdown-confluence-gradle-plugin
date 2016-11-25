@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 
 /**
@@ -34,6 +36,12 @@ public class ConfluenceServiceTest {
                 UrlChecker.pingConfluence(url, 500));
     }
 
+    @Before
+    public void setUp() throws Exception {
+        confluenceService.setConfluenceConfig(confluenceConfig);
+
+    }
+
     @Test
     public void testFindAncestorId() throws Exception {
         confluenceService.setConfluenceConfig(confluenceConfig);
@@ -42,12 +50,20 @@ public class ConfluenceServiceTest {
 
     }
 
+
+    @Test
+    public void testCreatePage() throws Exception {
+        ConfluencePage page = new ConfluencePage();
+        page.setTitle("temp-" + UUID.randomUUID().toString());
+        page.setContent("hello");
+        confluenceService.createPage(page);
+    }
+
     @Test
     public void testTryToCreateErroredPage() throws Exception {
 
-        confluenceService.setConfluenceConfig(confluenceConfig);
         ConfluencePage page = new ConfluencePage();
-        page.setConfluenceTitle("temp");
+        page.setTitle("temp");
         page.setContent("{no_such_macros}");
         Long id = confluenceService.findAncestorId(confluenceConfig.getSpaceKey());
         page.setAncestorId(id);

@@ -37,14 +37,16 @@ public class PageService {
             if (oldPage != null) {               // page exists
                 LOG.info("Update existing page");
                 oldPage.setContent(wiki);
-                oldPage.setConfluenceTitle(page.getTitle());
+                oldPage.setTitle(page.getTitle());
+                oldPage.setLabels(page.getLabels());
                 confluenceService.updatePage(oldPage);
 
             } else {
                 LOG.info("Create new page");
                 ConfluencePage newPage = new ConfluencePage();
                 newPage.setContent(wiki);
-                newPage.setConfluenceTitle(page.getTitle());
+                newPage.setTitle(page.getTitle());
+                newPage.setLabels(page.getLabels());
                 Long ancestorId = confluenceService.findAncestorId(page.getParentTitle());
                 newPage.setAncestorId(ancestorId);
 

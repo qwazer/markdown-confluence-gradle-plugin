@@ -103,6 +103,7 @@ public class ConfluenceConfig {
         private String parentTitle;
         private String title;
         private File srcFile;
+        private Collection<String> labels;
 
         public String getParentTitle() {
             return parentTitle;
@@ -128,6 +129,14 @@ public class ConfluenceConfig {
             this.title = title;
         }
 
+        public Collection<String> getLabels() {
+            return labels;
+        }
+
+        public void setLabels(Collection<String> labels) {
+            this.labels = labels;
+        }
+
         public void title(Object title){
             if (title!=null) {
                 this.title = title.toString();
@@ -148,8 +157,9 @@ public class ConfluenceConfig {
         public String toString() {
             return "Page{" +
                     "parentTitle='" + parentTitle + '\'' +
-                    ", srcFile=" + srcFile +
                     ", title='" + title + '\'' +
+                    ", srcFile=" + srcFile +
+                    ", labels=" + labels +
                     '}';
         }
     }

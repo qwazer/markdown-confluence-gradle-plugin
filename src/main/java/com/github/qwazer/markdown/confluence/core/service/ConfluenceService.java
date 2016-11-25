@@ -104,7 +104,7 @@ public class ConfluenceService {
         final JSONObject postVersionObject = new JSONObject();
         postVersionObject.put("number", page.getVersion() + 1);
 
-        final JSONObject postBody = buildPostBody(page.getAncestorId(), page.getConfluenceTitle(), page.getContent());
+        final JSONObject postBody = buildPostBody(page);
         postBody.put(ID, page.getId());
         postBody.put("version", postVersionObject);
 
@@ -124,7 +124,7 @@ public class ConfluenceService {
                 .build()
                 .toUri();
 
-        final String jsonPostBody = buildPostBody(page.getAncestorId(), page.getConfluenceTitle(), page.getContent()).toJSONString();
+        final String jsonPostBody = buildPostBody(page).toJSONString();
 
         LOG.debug("Request of creating page: {}", jsonPostBody);
 
@@ -163,7 +163,6 @@ public class ConfluenceService {
 
             confluencePage.setId(id);
             confluencePage.setVersion(version);
-            confluencePage.setExists(true);
 
             return confluencePage;
 
@@ -174,13 +173,13 @@ public class ConfluenceService {
     }
 
 
-    private JSONObject buildPostBody(final Long ancestorId, final String confluenceTitle, final String content) {
+    private JSONObject buildPostBody(ConfluencePage confluencePage) {
 
         final JSONObject jsonSpaceObject = new JSONObject();
         jsonSpaceObject.put("key", confluenceConfig.getSpaceKey());
 
         final JSONObject jsonStorageObject = new JSONObject();
-        jsonStorageObject.put("value", content);
+        jsonStorageObject.put("value", confluencePage.getContent());
         //  jsonStorageObject.put("representation", "storage");
         jsonStorageObject.put("representation", "wiki");
 
@@ -189,14 +188,14 @@ public class ConfluenceService {
 
         final JSONObject jsonObject = new JSONObject();
         jsonObject.put("type", "page");
-        jsonObject.put(TITLE, confluenceTitle);
+        jsonObject.put(TITLE, confluencePage.getTitle());
         jsonObject.put("space", jsonSpaceObject);
         jsonObject.put("body", jsonBodyObject);
 
-        if (ancestorId != null) {
+        if (confluencePage.getAncestorId() != null) {
             final JSONObject ancestor = new JSONObject();
             ancestor.put("type", "page");
-            ancestor.put(ID, ancestorId);
+            ancestor.put(ID, confluencePage.getAncestorId());
 
             final JSONArray ancestors = new JSONArray();
             ancestors.add(ancestor);

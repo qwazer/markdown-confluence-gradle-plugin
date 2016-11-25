@@ -33,6 +33,7 @@ confluence {
             parentTitle  'projectName'
             title "projectName-${project.version}"
             srcFile  file('release-notes.md')
+            labels = 'release-notes'
         }
         page {
             parentTitle = 'Home'

@@ -1,16 +1,20 @@
 package com.github.qwazer.markdown.confluence.core.model;
 
+import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
+
+import java.util.Collection;
+
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
  */
 public class ConfluencePage {
 
     private Long ancestorId;
-    private String confluenceTitle;
-    private Boolean exists;
+    private String title;
     private String id;
     private Integer version;
     private String content;
+    private Collection<String> labels;
 
     public Long getAncestorId() {
         return ancestorId;
@@ -20,20 +24,12 @@ public class ConfluencePage {
         this.ancestorId = ancestorId;
     }
 
-    public String getConfluenceTitle() {
-        return confluenceTitle;
+    public String getTitle() {
+        return title;
     }
 
-    public void setConfluenceTitle(String confluenceTitle) {
-        this.confluenceTitle = confluenceTitle;
-    }
-
-    public Boolean exists() {
-        return exists;
-    }
-
-    public void setExists(Boolean exists) {
-        this.exists = exists;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getId() {
@@ -61,4 +57,11 @@ public class ConfluencePage {
         this.content = content;
     }
 
+    public Collection<String> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(Collection<String> labels) {
+        this.labels = labels;
+    }
 }
