@@ -52,11 +52,28 @@ public class ConfluenceGradleTaskIT {
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir.getRoot())
                 .withArguments("confluence", "--info", "--stacktrace")
-                .withDebug(true)
                 .build();
 
-      // todo  assertTrue(result.getOutput().contains("Hello world!"));
         assertEquals(result.task(":confluence").getOutcome(), SUCCESS);
+    }
+
+    @Test
+    public void testVerboseError() throws IOException {
+
+        String content = IOUtils.toString(this.getClass().getResource("/gradle_builds/sample_build.gradle")) ;
+        String version = readCurrentVerion();
+        content = content.replaceAll("\\$VERSION", version);
+        writeFile(buildFile, content);
+        writeFile(readmeFile, "${strange_macro}");
+
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence")
+                .buildAndFail();
+
+        assertEquals(result.task(":confluence").getOutcome(), FAILED);
+        assertTrue(result.getOutput().contains("The macro \'strange_macro\' is unknown") );
     }
 
 

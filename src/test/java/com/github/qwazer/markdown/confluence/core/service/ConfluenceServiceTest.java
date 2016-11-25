@@ -4,6 +4,7 @@ import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.SpringConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
 import com.github.qwazer.markdown.confluence.core.UrlChecker;
+import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,4 +42,18 @@ public class ConfluenceServiceTest {
 
     }
 
+    @Test
+    public void testTryToCreateErroredPage() throws Exception {
+
+        confluenceService.setConfluenceConfig(confluenceConfig);
+        ConfluencePage page = new ConfluencePage();
+        page.setConfluenceTitle("temp");
+        page.setContent("{no_such_macros}");
+        Long id = confluenceService.findAncestorId(confluenceConfig.getSpaceKey());
+        page.setAncestorId(id);
+
+
+        confluenceService.createPage(page);
+
+    }
 }

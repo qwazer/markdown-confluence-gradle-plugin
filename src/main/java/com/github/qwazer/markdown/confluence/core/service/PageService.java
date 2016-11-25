@@ -1,12 +1,14 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
+import com.github.qwazer.markdown.confluence.core.ConfluenceException;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 
 /**
  * Created by Anton Reshetnikov on 14 Nov 2016.
@@ -29,23 +31,27 @@ public class PageService {
 
         confluenceService.setConfluenceConfig(confluenceConfig);
 
-        ConfluencePage oldPage = confluenceService.findPageByTitle(page.getTitle());
+        try {
+            ConfluencePage oldPage = confluenceService.findPageByTitle(page.getTitle());
 
-        if (oldPage != null) {               // page exists
-            LOG.info("Update existing page");
-            oldPage.setContent(wiki);
-            oldPage.setConfluenceTitle(page.getTitle());
-            confluenceService.updatePage(oldPage);
+            if (oldPage != null) {               // page exists
+                LOG.info("Update existing page");
+                oldPage.setContent(wiki);
+                oldPage.setConfluenceTitle(page.getTitle());
+                confluenceService.updatePage(oldPage);
 
-        } else {
-            LOG.info("Create new page");
-            ConfluencePage newPage = new ConfluencePage();
-            newPage.setContent(wiki);
-            newPage.setConfluenceTitle(page.getTitle());
-            Long ancestorId = confluenceService.findAncestorId(page.getParentTitle());
-            newPage.setAncestorId(ancestorId);
+            } else {
+                LOG.info("Create new page");
+                ConfluencePage newPage = new ConfluencePage();
+                newPage.setContent(wiki);
+                newPage.setConfluenceTitle(page.getTitle());
+                Long ancestorId = confluenceService.findAncestorId(page.getParentTitle());
+                newPage.setAncestorId(ancestorId);
 
-            confluenceService.createPage(newPage);
+                confluenceService.createPage(newPage);
+            }
+        } catch (HttpStatusCodeException e) {
+            throw new ConfluenceException(e.getResponseBodyAsString(), e);
         }
 
     }

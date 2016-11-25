@@ -16,15 +16,15 @@ import java.util.*;
 public class MainService {
 
     private final FileReaderService fileReaderService;
-    private final Markdown2WikiService markdown2WikiService;
+    private final MarkdownService markdownService;
     private final PageService pageService;
 
     @Autowired
     public MainService(FileReaderService fileReaderService,
-                       Markdown2WikiService markdown2WikiService,
+                       MarkdownService markdownService,
                        PageService pageService) {
         this.fileReaderService = fileReaderService;
-        this.markdown2WikiService = markdown2WikiService;
+        this.markdownService = markdownService;
         this.pageService = pageService;
     }
 
@@ -33,7 +33,7 @@ public class MainService {
         List<Page> orderedList = order(confluenceConfig.getPages());
         for (Page page : orderedList) {
             String plainFileContent = fileReaderService.readFile(page);
-            String wikiText = markdown2WikiService.convertMarkdown2Wiki(plainFileContent, confluenceConfig);
+            String wikiText = markdownService.convertMarkdown2Wiki(plainFileContent, confluenceConfig);
             pageService.postWikiPageToConfluence(page, confluenceConfig, wikiText);
         }
     }

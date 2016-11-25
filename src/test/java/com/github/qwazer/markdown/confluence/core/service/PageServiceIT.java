@@ -1,9 +1,7 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
-import com.github.qwazer.markdown.confluence.core.SpringConfig;
-import com.github.qwazer.markdown.confluence.core.UrlChecker;
-import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
+import com.github.qwazer.markdown.confluence.core.*;
+import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -12,8 +10,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.web.client.HttpStatusCodeException;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
@@ -24,6 +23,8 @@ public class PageServiceIT {
 
     @Autowired
     private PageService pageService;
+    @Autowired
+    private ConfluenceService confluenceService;
     private final ConfluenceConfig confluenceConfig = TestConfigFactory.testConfluenceConfig();
     private final ConfluenceConfig.Page page = TestConfigFactory.getPage();
 
@@ -48,6 +49,25 @@ public class PageServiceIT {
         pageService.postWikiPageToConfluence(page, confluenceConfig, "h1.gradle-markdown-confluence\n" +
                 "\n" +
                 "Gradle plugin to publish markdown pages to confluence {code:java} java code;{code} _italic_");
+    }
+
+
+    @Test
+    public void testTryToCreateErroredPage() throws Exception {
+
+        confluenceService.setConfluenceConfig(confluenceConfig);
+        ConfluenceConfig.Page page = new ConfluenceConfig.Page();
+        page.setTitle("temp");
+        page.setParentTitle("HOME");
+
+        try {
+            pageService.postWikiPageToConfluence(page, confluenceConfig, "{no_such_macros}");
+        } catch (ConfluenceException e) {
+            assertTrue(e.getMessage().contains("The macro \'no_such_macros\' is unknown"));
+            return;
+        }
+        fail();
+
     }
 
 }

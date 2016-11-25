@@ -3,7 +3,6 @@ package com.github.qwazer.markdown.confluence.core.service;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
 import org.gradle.internal.impldep.com.amazonaws.util.StringMapBuilder;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -14,10 +13,10 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
  */
-public class Markdown2WikiServiceTest {
+public class MarkdownServiceTest {
 
 
-    private Markdown2WikiService markdown2XtmlService = new Markdown2WikiService();
+    private MarkdownService markdown2XtmlService = new MarkdownService();
     private ConfluenceConfig confluenceConfig = TestConfigFactory.testConfluenceConfig();
 
 

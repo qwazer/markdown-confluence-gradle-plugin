@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
  * Created by Anton Reshetnikov on 15 Nov 2016.
  */
 @Service
-public class Markdown2WikiService  {
+public class MarkdownService {
 
     final PegDownProcessor pegDownProcessor = new PegDownProcessor(WikiConfluenceSerializer.extensions());
 
