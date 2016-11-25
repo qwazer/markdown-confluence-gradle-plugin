@@ -12,26 +12,14 @@ import java.util.*;
  */
 public class ConfluenceConfig {
 
-    private String parentPage;
     private String authentication;
-    private String confluenceRestApiUrl;
-    private File baseFile;
+    private String restApiUrl;
     private String spaceKey;
-    private String title;
     private boolean sslTrustAll = false;
     private Map<String,String> pageVariables;
 
     private Collection<Page> pages;
 
-
-
-    public File getBaseFile() {
-        return baseFile;
-    }
-
-    public void setBaseFile(File baseFile) {
-        this.baseFile = baseFile;
-    }
 
     public String getSpaceKey() {
         return spaceKey;
@@ -39,14 +27,6 @@ public class ConfluenceConfig {
 
     public void setSpaceKey(String spaceKey) {
         this.spaceKey = spaceKey;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public boolean isSslTrustAll() {
@@ -65,20 +45,12 @@ public class ConfluenceConfig {
         this.authentication = authentication;
     }
 
-    public String getConfluenceRestApiUrl() {
-        return confluenceRestApiUrl;
+    public String getRestApiUrl() {
+        return restApiUrl;
     }
 
-    public void setConfluenceRestApiUrl(String confluenceRestApiUrl) {
-        this.confluenceRestApiUrl = confluenceRestApiUrl;
-    }
-
-    public String getParentPage() {
-        return parentPage;
-    }
-
-    public void setParentPage(String parentPage) {
-        this.parentPage = parentPage;
+    public void setRestApiUrl(String restApiUrl) {
+        this.restApiUrl = restApiUrl;
     }
 
     public Map<String, String> getPageVariables() {
@@ -128,24 +100,24 @@ public class ConfluenceConfig {
     }
 
     public static class Page{
-        private String parentPage;
-        private File baseFile;
+        private String parentTitle;
         private String title;
+        private File srcFile;
 
-        public String getParentPage() {
-            return parentPage;
+        public String getParentTitle() {
+            return parentTitle;
         }
 
-        public void setParentPage(String parentPage) {
-            this.parentPage = parentPage;
+        public void setParentTitle(String parentTitle) {
+            this.parentTitle = parentTitle;
         }
 
-        public File getBaseFile() {
-            return baseFile;
+        public File getSrcFile() {
+            return srcFile;
         }
 
-        public void setBaseFile(File baseFile) {
-            this.baseFile = baseFile;
+        public void setSrcFile(File srcFile) {
+            this.srcFile = srcFile;
         }
 
         public String getTitle() {
@@ -162,38 +134,25 @@ public class ConfluenceConfig {
             }
         }
 
-        public void parentPage(Object parentPage){
-            if (parentPage!=null) {
-                this.parentPage = parentPage.toString();
+        public void parentTitle(Object parentTitle){
+            if (parentTitle!=null) {
+                this.parentTitle = parentTitle.toString();
             }
         }
 
         public void baseFile(File baseFile) {
-            this.baseFile = baseFile;
+            this.srcFile = baseFile;
         }
 
         @Override
         public String toString() {
             return "Page{" +
-                    "parentPage='" + parentPage + '\'' +
-                    ", baseFile=" + baseFile +
+                    "parentTitle='" + parentTitle + '\'' +
+                    ", srcFile=" + srcFile +
                     ", title='" + title + '\'' +
                     '}';
         }
     }
 
-    @Override
-    public String toString() {
-        return "ConfluenceConfig{" +
-                "parentPage='" + parentPage + '\'' +
-                ", authentication='" + authentication + '\'' +
-                ", confluenceRestApiUrl='" + confluenceRestApiUrl + '\'' +
-                ", baseFile=" + baseFile +
-                ", spaceKey='" + spaceKey + '\'' +
-                ", title='" + title + '\'' +
-                ", sslTrustAll=" + sslTrustAll +
-                ", pageVariables=" + pageVariables +
-                ", pages=" + pages +
-                '}';
-    }
+
 }

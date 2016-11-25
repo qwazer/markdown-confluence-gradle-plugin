@@ -57,14 +57,14 @@ public class ConfluenceGradleTask extends DefaultTask {
 
     protected static void validate(ConfluenceConfig config){
         Assert.notNull(config);
-        Assert.hasLength(config.getConfluenceRestApiUrl());
+        Assert.hasLength(config.getRestApiUrl());
         Assert.hasLength(config.getSpaceKey());
         Assert.notNull(config.getPages());
 
         for (ConfluenceConfig.Page page :config.getPages()){
-            Assert.hasLength(page.getParentPage());
+            Assert.hasLength(page.getParentTitle());
             Assert.hasLength(page.getTitle());
-            Assert.notNull(page.getBaseFile());
+            Assert.notNull(page.getSrcFile());
         }
         validateNoDuplicates(config.getPages());
     }

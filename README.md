@@ -23,21 +23,21 @@ Sample config
 ```groovy
 confluence {
     authentication 'base64-encoded user:pass'
-    confluenceRestApiUrl 'https://confluence.acme.com/rest/api/'
+    restApiUrl 'https://confluence.acme.com/rest/api/'
     spaceKey 'SAMPLE'
     sslTrustAll true
     pageVariables = ['project.name': project.name]
 
     pages {
         page {
-            parentPage  'projectName'
+            parentTitle  'projectName'
             title "projectName-${project.version}"
-            baseFile  file('release-notes.md')
+            srcFile  file('release-notes.md')
         }
         page {
-            parentPage = 'Home'
+            parentTitle = 'Home'
             title = 'projectName'
-            baseFile = file('README.md')
+            srcFile = file('README.md')
         }
     }
 }
@@ -49,14 +49,14 @@ confluence {
 parameter | datatype | optional | description
 ------------ | ------------- | -------------| -------------
 authentication | String | no | 'user:pass'.bytes.encodeBase64().toString()
-confluenceRestApiUrl | String | no |  confluence rest api url
-spaceKey | String | no |  space key
-sslTrustAll | Boolean | yes |  ignore self-signed and unknown sertificate errors. Usefull in some corporate enviroments
-pageVariables | Map<String,String> | yes | map of page variables, for example ```${project.name}``` will substituted by value of variable
+restApiUrl | String | no |  Confluence REST API URL
+spaceKey | String | no |  Confluence space key
+sslTrustAll | Boolean | yes |  Setting to ignore self-signed and unknown sertificate errors. Usefull in some corporate enviroments
+pageVariables | Map<String,String> | yes | Map of page variables, for example ```${project.name}``` in source file content will substituted by value of variable
 pages | Closure | no | Collection of Page Closures. If this config contain several pages, these will be ordered according their parent-child relationship
-page.parentPage  | String | no | Parent page title, will use to resovle actual page ancestorId  against Confluence instance
-page.title  | String | no | page title
-page.baseFile  | File | no | page content
+page.parentTitle  | String | no | Parent page title, will use to resovle actual page ancestorId  against Confluence instance
+page.title  | String | no | Page title
+page.srcFile  | File | no | File with source of wiki page in markdown format (can be mixed with [Confluence Wiki Markup](https://confluence.atlassian.com/doc/confluence-wiki-markup-251003035.html))
 
 
 

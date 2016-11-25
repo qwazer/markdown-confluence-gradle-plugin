@@ -1,14 +1,11 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.ConfluenceException;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +17,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
-
-import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
 
 /**
  * Created by Anton Reshetnikov on 24 Nov 2016.
@@ -64,7 +59,7 @@ public class ConfluenceService {
 
         final HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
 
-        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getConfluenceRestApiUrl())
+        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
                 .path("/content")
                 .queryParam(SPACE_KEY, confluenceConfig.getSpaceKey())
                 .queryParam(TITLE, title)
@@ -83,7 +78,7 @@ public class ConfluenceService {
 
         final HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
 
-        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getConfluenceRestApiUrl())
+        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
                 .path("/content")
                 .queryParam(SPACE_KEY, confluenceConfig.getSpaceKey())
                 .queryParam(EXPAND, "body.storage,version,ancestors")
@@ -100,7 +95,7 @@ public class ConfluenceService {
 
     public void updatePage(final ConfluencePage page) {
 
-        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getConfluenceRestApiUrl())
+        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
                 .path(String.format("/content/%s", page.getId()))
                 .build()
                 .toUri();
@@ -124,7 +119,7 @@ public class ConfluenceService {
     }
 
     public void createPage(final ConfluencePage page) {
-        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getConfluenceRestApiUrl())
+        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
                 .path("/content")
                 .build()
                 .toUri();

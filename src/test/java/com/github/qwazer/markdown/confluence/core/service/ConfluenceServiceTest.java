@@ -28,7 +28,7 @@ public class ConfluenceServiceTest {
 
     @Before
     public void pingRestAPIUrl(){
-        String url = TestConfigFactory.testConfluenceConfig().getConfluenceRestApiUrl();
+        String url = TestConfigFactory.testConfluenceConfig().getRestApiUrl();
         Assume.assumeTrue( "Url should be available " + url ,
                 UrlChecker.pingConfluence(url, 500));
     }

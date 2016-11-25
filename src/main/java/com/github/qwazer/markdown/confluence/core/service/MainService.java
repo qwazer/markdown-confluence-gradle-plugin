@@ -65,7 +65,7 @@ public class MainService {
     private static boolean hasParent(Page page, Collection<Page> pages) {
         boolean res = false;
         for (Page curr  : pages){
-            if (curr.getTitle().equals(page.getParentPage())){
+            if (curr.getTitle().equals(page.getParentTitle())){
                 return true;
             }
         }

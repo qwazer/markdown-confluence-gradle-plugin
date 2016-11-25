@@ -4,7 +4,6 @@ import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -16,7 +15,7 @@ import java.nio.file.Files;
 public class FileReaderService  {
     public String readFile(ConfluenceConfig.Page page) throws IOException {
 
-        File file = page.getBaseFile();
+        File file = page.getSrcFile();
         return new String(Files.readAllBytes(file.toPath()), Charset.forName("UTF-8"));
 
     }

@@ -42,7 +42,7 @@ public class PageService {
             ConfluencePage newPage = new ConfluencePage();
             newPage.setContent(wiki);
             newPage.setConfluenceTitle(page.getTitle());
-            Long ancestorId = confluenceService.findAncestorId(page.getParentPage());
+            Long ancestorId = confluenceService.findAncestorId(page.getParentTitle());
             newPage.setAncestorId(ancestorId);
 
             confluenceService.createPage(newPage);

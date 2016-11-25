@@ -24,10 +24,8 @@ public class TestConfigFactory {
         ConfluenceConfig config = new ConfluenceConfig();
 
         config.setSpaceKey("SN");
-        config.setConfluenceRestApiUrl("http://localhost:8090/rest/api/");
+        config.setRestApiUrl("http://localhost:8090/rest/api/");
         config.setAuthentication(getAuth());
-        config.setTitle("README.md");
-        config.setBaseFile(new File("README.md"));
         config.setPages(new ArrayList<ConfluenceConfig.Page>());
         config.getPages().add(getPage());
         return  config;
