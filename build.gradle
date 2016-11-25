@@ -1,20 +1,25 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
-}
-
-plugins {
-    id "com.jfrog.bintray" version "1.7"
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.6"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+    }
 }
 
 group 'com.github.qwazer'
 version "$VERSION"
+description 'A plugin for publishing markdown or confluence wiki files to to an Atlassian Confluence server'
 
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.gradle.plugin-publish'
 
 sourceCompatibility = 1.7
 
@@ -69,6 +74,20 @@ publishing {
             groupId 'com.github.qwazer'
             artifactId project.name
             version project.version
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/qwazer/markdown-confluence-gradle-plugin'
+    vcsUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin.git'
+    description = project.description
+    tags = ['markdown', 'confluence']
+
+    plugins {
+        markdownConfluenceGradlePlugin {
+            id = 'com.github.qwazer.markdown-confluence'
+            displayName = 'Markdown Confluence'
         }
     }
 }
