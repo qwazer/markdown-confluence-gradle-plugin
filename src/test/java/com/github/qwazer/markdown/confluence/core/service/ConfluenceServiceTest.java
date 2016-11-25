@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import static com.github.qwazer.markdown.confluence.core.service.ConfluenceService.parseLabels;
 import static org.junit.Assert.*;
 
 /**
@@ -73,35 +72,5 @@ public class ConfluenceServiceTest {
 
     }
 
-    @Test
-    public void testDeleteLabel() throws Exception {
-        confluenceService.deleteLabelByName(819284L, "l1");
 
-    }
-
-    @Test
-    public void testTryToCreateErroredPage() throws Exception {
-
-        ConfluencePage page = new ConfluencePage();
-        page.setTitle("temp");
-        page.setContent("{no_such_macros}");
-        Long id = confluenceService.findAncestorId(confluenceConfig.getSpaceKey());
-        page.setAncestorId(id);
-
-
-        confluenceService.createPage(page);
-
-    }
-
-    @Test
-    public void testParseLabels() throws Exception {
-        String s = "{\"results\":[{\"prefix\":\"global\",\"name\":\"l2\",\"id\":\"1146883\"},{\"prefix\":\"global\",\"name\":\"l3\",\"id\":\"1146884\"}],\"start\":0,\"limit\":200,\"size\":2,\"_links\":{\"self\":\"http://localhost:8090/rest/api/content/819284/label\",\"base\":\"http://localhost:8090\",\"context\":\"\"}}";
-        List<String> col = parseLabels(new ResponseEntity<String>(s, HttpStatus.ACCEPTED));
-
-        assertTrue(col.size() == 2);
-        assertEquals(col.get(0), "l2");
-        assertEquals(col.get(1), "l3");
-
-
-    }
 }

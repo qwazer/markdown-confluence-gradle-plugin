@@ -144,40 +144,7 @@ public class ConfluenceService {
     }
 
 
-    public List<String> getLabels(Long pageId){
-        URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path("/content/{id}/label")
-                .queryParam("prefix", "global")
-                .buildAndExpand(pageId)
-                .toUri();
 
-        LOG.debug("Request of get labels: {}", pageId);
-        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-        HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.GET, requestEntity, String.class);
-
-
-       return parseLabels(requestEntity);
-
-    }
-
-    protected static List<String> parseLabels(HttpEntity<String> requestEntity) {
-        String jsonBody = requestEntity.getBody();
-        ArrayList<String> res = new ArrayList<>();
-        try {
-            final JSONArray jsonArray = JsonPath.read(jsonBody, "$.results");
-
-            for (Object labelJson : jsonArray) {
-                res.add(JsonPath.read(labelJson, "name").toString());
-            }
-        }
-        catch (PathNotFoundException e){
-            LOG.warn("cannot parse label value from json {}" , jsonBody );
-        }
-
-        return res;
-
-    }
 
 
     public void addLabels(Long pageId, Collection<String> labels){
@@ -196,21 +163,6 @@ public class ConfluenceService {
 
     }
 
-    public void deleteLabelByName(Long pageId, String name){
-        URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path("/content/{id}/label")
-                .queryParam("name", name)
-                .buildAndExpand(pageId)
-                .toUri();
-
-
-
-        LOG.debug("Request of delete labels of page: {}", pageId);
-        HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-        HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.DELETE, requestEntity, String.class);
-
-    }
 
     private static String buildAddLabelsPostBody(Collection<String> labels) {
         if (labels==null || labels.isEmpty()) return null;
