@@ -167,19 +167,19 @@ public abstract class WikiConfluenceSerializer implements Visitor {
             public boolean f(TextNode p, Node parent, int index ) {
                 if( index != 0 ) return false;
 
-                if( "note:".equalsIgnoreCase(p.getText()) ) {
+                if( "note:".equalsIgnoreCase(replaceProperties(p.getText())) ) {
                     element = "note"; // SET ELEMENT TAG
                     return true;
                 }
-                if( "warning:".equalsIgnoreCase(p.getText()) ) {
+                if( "warning:".equalsIgnoreCase(replaceProperties(p.getText())) ) {
                     element = "warning"; // SET ELEMENT TAG
                     return true;
                 }
-                if( "info:".equalsIgnoreCase(p.getText()) ) {
+                if( "info:".equalsIgnoreCase(replaceProperties(p.getText())) ) {
                     element = "info"; // SET ELEMENT TAG
                     return true;
                 }
-                if( "tip:".equalsIgnoreCase(p.getText()) ) {
+                if( "tip:".equalsIgnoreCase(replaceProperties(p.getText())) ) {
                     element = "tip"; // SET ELEMENT TAG
                     return true;
                 }
@@ -380,7 +380,7 @@ public abstract class WikiConfluenceSerializer implements Visitor {
         final String lines[] = vn.getText().split("\n");
         if( lines.length == 1 ) {
             _buffer.append( "{noformat}")
-                   .append(vn.getText())
+                   .append(replaceProperties(vn.getText()))
                    .append( "{noformat}");
             return;
         }
@@ -388,7 +388,7 @@ public abstract class WikiConfluenceSerializer implements Visitor {
         if( vn.getType()==null || vn.getType().isEmpty() ) {
             _buffer.append( "{noformat}")
                     .append('\n')
-                    .append(vn.getText())
+                    .append(replaceProperties(vn.getText()))
                     .append('\n')
                     .append("{noformat}")
                     .append('\n')
@@ -398,7 +398,7 @@ public abstract class WikiConfluenceSerializer implements Visitor {
 
         _buffer.append( format("{code:%s}", vn.getType()) )
                 .append('\n')
-                .append(vn.getText())
+                .append(replaceProperties(vn.getText()))
                 .append('\n')
                 .append("{code}")
                 .append('\n')
@@ -408,7 +408,7 @@ public abstract class WikiConfluenceSerializer implements Visitor {
     @Override
     public void visit(CodeNode cn) {
 
-        final String text = cn.getText();
+        final String text = replaceProperties(cn.getText());
         
         final String lines[] = text.split("\n");
         if( lines.length == 1 ) {
