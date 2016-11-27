@@ -8,3 +8,11 @@ jdk:
 install: echo "skip 'gradle assemble' step"
 script:
    - ./gradlew build
+
+deploy:
+  provider: script
+  script: ./gradlew bintrayUpload
+  on:
+    branch: master
+    tags: true
+
