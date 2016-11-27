@@ -15,4 +15,7 @@ deploy:
   on:
     branch: master
     tags: true
+    # deploy only with oraclejdk7
+    condition: JAVA_HOME = /usr/lib/jvm/java-7-oracle
+
 
