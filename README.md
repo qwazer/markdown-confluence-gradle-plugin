@@ -13,7 +13,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.5'
+        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.6-RC01'
     }
 }
 ```
