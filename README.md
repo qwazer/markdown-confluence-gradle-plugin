@@ -33,7 +33,7 @@ confluence {
             parentTitle  'projectName'
             title "projectName-${project.version}"
             srcFile  file('release-notes.md')
-            labels = 'release-notes'
+            labels = ['release-notes', project.name]
         }
         page {
             parentTitle = 'Home'
@@ -58,7 +58,7 @@ pages | Closure | no | Collection of Page Closures. If this config contain sever
 page.parentTitle  | String | no | Parent page title, will use to resovle actual page ancestorId  against Confluence instance
 page.title  | String | no | Page title
 page.srcFile  | File | no | File with source of wiki page in markdown format (can be mixed with [Confluence Wiki Markup](https://confluence.atlassian.com/doc/confluence-wiki-markup-251003035.html))
-
+page.labels  | Collection<String> | no | Collection of labels of the Confluence page
 
 
 

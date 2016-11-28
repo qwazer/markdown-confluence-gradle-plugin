@@ -144,10 +144,10 @@ public class ConfluenceService {
     }
 
 
+    public void addLabels(Long pageId, Collection<String> labels) {
+        if (labels == null || labels.isEmpty())
+            return;
 
-
-
-    public void addLabels(Long pageId, Collection<String> labels){
         URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
                 .path("/content/{id}/label")
                 .buildAndExpand(pageId)
@@ -168,10 +168,12 @@ public class ConfluenceService {
         if (labels==null || labels.isEmpty()) return null;
         JSONArray jsonArray = new JSONArray();
         for (String s : labels){
-            JSONObject label = new JSONObject();
-            label.put("prefix", "global");
-            label.put("name", s);
-            jsonArray.add(label);
+            if (s != null && !s.isEmpty()) {
+                JSONObject label = new JSONObject();
+                label.put("prefix", "global");
+                label.put("name", s);
+                jsonArray.add(label);
+            }
         }
         return jsonArray.toJSONString();
     }
