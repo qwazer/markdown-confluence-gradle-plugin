@@ -61,4 +61,22 @@ public class MarkdownServiceTest {
         assertTrue(wiki.contains(value));
 
     }
+
+    @Test
+    public void testMarkdownLinkReplace() throws Exception {
+        String content = "[скачать](${url})";
+        String key = "url";
+        String value = "http://localhost";
+
+        assertTrue(content.contains("${"+key +"}"));
+        assertFalse(content.contains(value));
+        Map<String,String>  stringMap = new StringMapBuilder(key,value).build();
+        confluenceConfig.setPageVariables(stringMap);
+
+        String wiki = markdown2XtmlService.convertMarkdown2Wiki(content, confluenceConfig);
+
+        assertFalse(wiki.contains("${"+key +"}"));
+        assertTrue(wiki.contains(value));
+
+    }
 }

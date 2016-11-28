@@ -370,7 +370,7 @@ public abstract class WikiConfluenceSerializer implements Visitor {
     public void visit(ExpLinkNode eln) {
         _buffer.append( '[');
         visitChildren(eln);
-        _buffer.append(format("|%s|%s]", eln.url, eln.title));
+        _buffer.append(format("|%s|%s]", replaceProperties(eln.url), eln.title));
     }
 
 
