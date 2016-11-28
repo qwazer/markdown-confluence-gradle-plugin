@@ -65,6 +65,7 @@ public class ConfluenceGradleTask extends DefaultTask {
             Assert.hasLength(page.getParentTitle());
             Assert.hasLength(page.getTitle());
             Assert.notNull(page.getSrcFile());
+            Assert.isTrue(!page.getParentTitle().equals(page.getTitle()), String.format("Page with title %s cannot be parent of itself ", page.getTitle()));
         }
         validateNoDuplicates(config.getPages());
     }

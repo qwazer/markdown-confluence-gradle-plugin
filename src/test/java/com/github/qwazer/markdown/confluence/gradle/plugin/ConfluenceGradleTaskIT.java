@@ -30,6 +30,11 @@ public class ConfluenceGradleTaskIT {
     public void setup() throws IOException {
         buildFile = testProjectDir.newFile("build.gradle");
         readmeFile = testProjectDir.newFile("README.md");
+        testProjectDir.newFolder("src");
+        readmeFile = testProjectDir.newFile("src/file1.md");
+        readmeFile = testProjectDir.newFile("src/file2.txt");
+        readmeFile = testProjectDir.newFile("src/file3.txt");
+        readmeFile = testProjectDir.newFile("src/file4.md");
     }
 
     @Before
@@ -52,6 +57,26 @@ public class ConfluenceGradleTaskIT {
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir.getRoot())
                 .withArguments("confluence", "--info", "--stacktrace")
+                .withDebug(true)
+                .build();
+
+        assertEquals(result.task(":confluence").getOutcome(), SUCCESS);
+    }
+
+    @Test
+    public void testConfluenceTaskWithChildFiles() throws IOException {
+
+        String content = IOUtils.toString(this.getClass().getResource("/gradle_builds/child_files.gradle")) ;
+        String version = readCurrentVerion();
+        content = content.replaceAll("\\$VERSION", version);
+        writeFile(buildFile, content);
+        writeFile(readmeFile, "#hello \n${project.name}");
+
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence", "--info", "--stacktrace")
+                .withDebug(true)
                 .build();
 
         assertEquals(result.task(":confluence").getOutcome(), SUCCESS);
