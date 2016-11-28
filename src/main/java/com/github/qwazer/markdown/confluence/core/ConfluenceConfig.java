@@ -133,8 +133,13 @@ public class ConfluenceConfig {
             return labels;
         }
 
-        public void setLabels(Collection<String> labels) {
-            this.labels = labels;
+        public void setLabels(Collection<? extends CharSequence> labels) {
+            this.labels = new ArrayList<String>();
+            for (CharSequence charSequence : labels){
+                if (charSequence!=null) {
+                    this.labels.add(charSequence.toString());
+                }
+            }
         }
 
         public void title(Object title){
