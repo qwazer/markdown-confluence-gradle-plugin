@@ -44,6 +44,25 @@ confluence {
 }
 ```
 
+It's possible to define multuply pages with groovy closures.
+For example, next code snippet will define all *.md files inside src directory as confluence page 
+with title baseFileName (stripped from path and extension) and parent page title 'parentTitle'.
+
+```groovy
+    pages {
+        fileTree('src')
+                .include('**/*.md')
+                .collect { file ->
+            page {
+                parentTitle = 'parentTitle'
+                title = file.name.take(file.name.lastIndexOf('.'))
+                srcFile = file
+            }
+        }
+    }
+
+```
+
 ### Description of config parameters
 
 
