@@ -13,7 +13,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class MarkdownService {
 
-    final PegDownProcessor pegDownProcessor = new PegDownProcessor(WikiConfluenceSerializer.extensions());
+    private PegDownProcessor pegDownProcessor = new PegDownProcessor(WikiConfluenceSerializer.extensions());
+
+    MarkdownService() {
+
+    }
+
+    MarkdownService(long parseTimeOut) {
+        this.pegDownProcessor = new PegDownProcessor(WikiConfluenceSerializer.extensions(), parseTimeOut);
+    }
 
     public String convertMarkdown2Wiki(final String s, ConfluenceConfig confluenceConfig) {
 

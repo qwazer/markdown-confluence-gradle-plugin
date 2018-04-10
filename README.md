@@ -27,6 +27,7 @@ confluence {
     spaceKey 'SAMPLE'
     sslTrustAll true
     pageVariables = ['project.name': project.name]
+    parseTimeout 2000L
 
     pages {
         page {
@@ -73,6 +74,7 @@ restApiUrl | String | no |  Confluence REST API URL
 spaceKey | String | no |  Confluence space key
 sslTrustAll | Boolean | yes |  Setting to ignore self-signed and unknown sertificate errors. Usefull in some corporate enviroments
 pageVariables | Map<String,String> | yes | Map of page variables, for example ```${project.name}``` in source file content will substituted by value of variable
+parseTimeout | Long | yes | Timeout parameter for Markdown serializer
 pages | Closure | no | Collection of Page Closures. If this config contain several pages, these will be ordered according their parent-child relationship
 page.parentTitle  | String | no | Parent page title, will use to resovle actual page ancestorId  against Confluence instance
 page.title  | String | no | Page title

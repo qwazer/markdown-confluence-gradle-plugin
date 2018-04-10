@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 
+import static com.github.qwazer.markdown.confluence.core.ConfluenceConfig.DEFAULT_PARSE_TIMEOUT;
+
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
  */
@@ -16,7 +18,7 @@ import java.util.*;
 public class MainService {
 
     private final FileReaderService fileReaderService;
-    private final MarkdownService markdownService;
+    private MarkdownService markdownService;
     private final PageService pageService;
 
     @Autowired
@@ -29,6 +31,10 @@ public class MainService {
     }
 
     public void processAll(ConfluenceConfig confluenceConfig) throws IOException {
+
+        if (confluenceConfig.getParseTimeout() != DEFAULT_PARSE_TIMEOUT) {
+            this.markdownService = new MarkdownService(confluenceConfig.getParseTimeout());
+        }
 
         List<Page> orderedList = order(confluenceConfig.getPages());
         for (Page page : orderedList) {
