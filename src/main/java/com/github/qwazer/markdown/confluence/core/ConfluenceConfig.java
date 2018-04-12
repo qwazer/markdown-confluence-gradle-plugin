@@ -12,11 +12,14 @@ import java.util.*;
  */
 public class ConfluenceConfig {
 
+    public static final long DEFAULT_PARSE_TIMEOUT = 2000L;
+
     private String authentication;
     private String restApiUrl;
     private String spaceKey;
     private boolean sslTrustAll = false;
     private Map<String,String> pageVariables;
+    private Long parseTimeout = DEFAULT_PARSE_TIMEOUT;
 
     private Collection<Page> pages;
 
@@ -79,6 +82,13 @@ public class ConfluenceConfig {
         this.pages = pagesHolder.getPages();
     }
 
+    public void setParseTimeout(long parseTimeout) {
+        this.parseTimeout = parseTimeout;
+    }
+
+    public long getParseTimeout() {
+        return this.parseTimeout;
+    }
 
 
     public static class PagesHolder {
@@ -176,6 +186,7 @@ public class ConfluenceConfig {
                 ", restApiUrl='" + restApiUrl + '\'' +
                 ", spaceKey='" + spaceKey + '\'' +
                 ", sslTrustAll=" + sslTrustAll +
+                ", parseTimeout=" + parseTimeout +
                 ", pageVariables=" + pageVariables +
                 ", pages=" + pages +
                 '}';
