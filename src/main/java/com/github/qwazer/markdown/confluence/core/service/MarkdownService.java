@@ -27,16 +27,12 @@ public class MarkdownService {
         WikiConfluenceSerializer ser =  new WikiConfluenceSerializer(confluenceConfig.getPageVariables()) {
             @Override
             protected void notImplementedYet(Node node) {
-
-
                 final int lc[] = WikiConfluenceSerializer.lineAndColFromNode( s, node);
                 throw new UnsupportedOperationException( String.format("Node [%s] not supported yet. line=[%d] col=[%d]",
                         node.getClass().getSimpleName(),
                         lc[0],
                         lc[1] ));
             }
-
-
         };
 
         root.accept(ser);
