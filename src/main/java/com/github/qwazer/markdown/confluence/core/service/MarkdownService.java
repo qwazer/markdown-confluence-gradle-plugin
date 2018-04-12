@@ -16,7 +16,6 @@ public class MarkdownService {
     private PegDownProcessor pegDownProcessor = new PegDownProcessor(WikiConfluenceSerializer.extensions());
 
     MarkdownService() {
-
     }
 
     MarkdownService(long parseTimeOut) {
@@ -24,11 +23,8 @@ public class MarkdownService {
     }
 
     public String convertMarkdown2Wiki(final String s, ConfluenceConfig confluenceConfig) {
-
         final RootNode root = pegDownProcessor.parseMarkdown(s.toCharArray());
-
         WikiConfluenceSerializer ser =  new WikiConfluenceSerializer(confluenceConfig.getPageVariables()) {
-
             @Override
             protected void notImplementedYet(Node node) {
 
