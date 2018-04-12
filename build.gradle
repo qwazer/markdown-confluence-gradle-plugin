@@ -6,8 +6,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.6"
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.10"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     }
 }
 
@@ -30,18 +30,18 @@ repositories {
 
 dependencies {
     compile gradleApi()
-    compile "org.slf4j:slf4j-api:1.7.19"
+    compile "org.slf4j:slf4j-api:1.7.25"
     compile "org.springframework:spring-core:$SPRING_VERSION"
     compile "org.springframework:spring-web:$SPRING_VERSION"
-    compile "com.jayway.jsonpath:json-path:2.2.0"
-    compile "org.jsoup:jsoup:1.8.3"
+    compile "com.jayway.jsonpath:json-path:2.4.0"
+    compile "org.jsoup:jsoup:1.11.2"
     compile "org.pegdown:pegdown:1.6.0"
 
 
     testCompile gradleTestKit()
-    testCompile "commons-io:commons-io:2.4"
+    testCompile "commons-io:commons-io:2.6"
     testCompile "junit:junit:4.12"
-    testCompile "org.mockito:mockito-core:1.10.19"
+    testCompile "org.mockito:mockito-core:2.18.0"
     testCompile "org.springframework:spring-test:$SPRING_VERSION"
 }
 
