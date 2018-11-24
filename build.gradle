@@ -32,6 +32,7 @@ dependencies {
     compile gradleApi()
     compile "org.slf4j:slf4j-api:1.7.25"
     compile "org.springframework:spring-core:$SPRING_VERSION"
+    compile "org.springframework:spring-context:$SPRING_VERSION"
     compile "org.springframework:spring-web:$SPRING_VERSION"
     compile "com.jayway.jsonpath:json-path:2.4.0"
     compile "org.jsoup:jsoup:1.11.2"
