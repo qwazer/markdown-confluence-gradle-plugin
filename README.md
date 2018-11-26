@@ -67,7 +67,7 @@ with title baseFileName (stripped from path and extension) and parent page title
 
 ### Note for Spring Boot user
 
-Can conflict with Spring Boot 1.x. Please vote for [#9](https://github.com/qwazer/markdown-confluence-gradle-plugin/issues/9) to solve.
+Can conflict with Spring Boot 1.x. Please vote for [#9](https://github.com/qwazer/markdown-confluence-gradle-plugin/issues/9) to solve or use version 0.7.
 
 ### Description of config parameters
 
