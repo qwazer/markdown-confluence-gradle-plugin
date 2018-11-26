@@ -13,7 +13,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.7'
+        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.8'
     }
 }
 ```
@@ -63,6 +63,11 @@ with title baseFileName (stripped from path and extension) and parent page title
     }
 
 ```
+
+
+### Note for Spring Boot user
+
+Can conflict with Spring 1.x. Please vote for #9 to solve.
 
 ### Description of config parameters
 
