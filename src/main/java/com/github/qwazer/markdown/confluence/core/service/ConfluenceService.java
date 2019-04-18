@@ -68,7 +68,8 @@ public class ConfluenceService {
                 .queryParam(SPACE_KEY, confluenceConfig.getSpaceKey())
                 .queryParam(TITLE, title)
                 .queryParam(EXPAND, "body.storage,version,ancestors")
-                .build()
+                .build(false)
+                .encode()
                 .toUri();
 
         final ResponseEntity<String> responseEntity = restTemplate.exchange(targetUrl,
@@ -86,7 +87,8 @@ public class ConfluenceService {
                 .path("/content")
                 .queryParam(SPACE_KEY, confluenceConfig.getSpaceKey())
                 .queryParam(EXPAND, "body.storage,version,ancestors")
-                .build()
+                .build(false)
+                .encode()
                 .toUri();
 
         final ResponseEntity<String> responseEntity = restTemplate.exchange(targetUrl,
