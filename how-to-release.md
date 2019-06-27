@@ -1,6 +1,5 @@
 1. update
 ```
-CHANGELOG.md
 gradle.properties
 ```
 
