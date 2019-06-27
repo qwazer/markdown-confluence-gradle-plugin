@@ -1,3 +1,10 @@
+version 0.9
+-----------
+
+[#18](https://github.com/qwazer/markdown-confluence-gradle-plugin/pull/18) : encode query parameters to handle special characters
+
+update spring and gradle versions
+
 version 0.8
 -----------
 
