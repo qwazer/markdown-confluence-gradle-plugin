@@ -19,3 +19,5 @@ docker run --rm -p 8090:8090 -p 8091:8091 atlassian/confluence-server
 >  Click Edit.
 >  Click the check box next to Remote API (XML-RPC & SOAP).
 >  Click Save.
+
+7. invoke gradle :publishToMavenLocal before running of IT tests

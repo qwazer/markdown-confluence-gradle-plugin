@@ -67,8 +67,23 @@ public class ConfluenceServiceTest {
 
 
     @Test
+    @Ignore
+    public void testCreatePageWithUnkownMacro() throws Exception {
+        ConfluencePage page = new ConfluencePage();
+        page.setTitle("temp-" + UUID.randomUUID().toString());
+        page.setContent("{unknown_macro} hello");
+        confluenceService.createPage(page);
+    }
+
+
+    @Test
     public void testAddLabel() throws Exception {
-        confluenceService.addLabels(819284L, Arrays.asList("l1", "l2"));
+        ConfluencePage page = new ConfluencePage();
+        page.setTitle("temp-" + UUID.randomUUID().toString());
+        page.setContent("hello");
+        Long pageId = confluenceService.createPage(page);
+
+        confluenceService.addLabels(pageId, Arrays.asList("l1", "l2"));
 
     }
 

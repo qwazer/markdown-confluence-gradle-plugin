@@ -83,6 +83,7 @@ public class ConfluenceGradleTaskIT {
     }
 
     @Test
+    @Ignore
     public void testVerboseError() throws IOException {
 
         String content = IOUtils.toString(this.getClass().getResource("/gradle_builds/sample_build.gradle")) ;
