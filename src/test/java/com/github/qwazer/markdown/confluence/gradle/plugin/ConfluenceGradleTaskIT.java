@@ -72,7 +72,6 @@ public class ConfluenceGradleTaskIT {
         writeFile(buildFile, content);
         writeFile(readmeFile, "#hello \n${project.name}");
 
-
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir.getRoot())
                 .withArguments("confluence", "--info", "--stacktrace")

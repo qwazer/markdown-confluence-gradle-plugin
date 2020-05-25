@@ -28,10 +28,8 @@ public class PageService {
         this.confluenceService = confluenceService;
     }
 
-    public void postWikiPageToConfluence(final ConfluenceConfig.Page page, final ConfluenceConfig confluenceConfig, final String wiki) {
+    public Long postWikiPageToConfluence(final ConfluenceConfig.Page page, final String wiki) {
         LOG.info("Posting page {} to Confluence...", page.getTitle());
-
-        confluenceService.setConfluenceConfig(confluenceConfig);
 
         try {
             ConfluencePage oldPage = confluenceService.findPageByTitle(page.getTitle());
@@ -43,6 +41,8 @@ public class PageService {
                 oldPage.setLabels(page.getLabels());
                 confluenceService.updatePage(oldPage);
                 confluenceService.addLabels(oldPage.getId(), page.getLabels());
+
+                return oldPage.getId();
 
             } else {
                 LOG.info("Create new page");
@@ -56,11 +56,12 @@ public class PageService {
                 Long pageId = confluenceService.createPage(newPage);
 
                 confluenceService.addLabels(pageId, page.getLabels());
+
+                return pageId;
             }
         } catch (HttpStatusCodeException e) {
             throw new ConfluenceException(e.getResponseBodyAsString(), e);
         }
-
     }
 
 
@@ -84,6 +85,4 @@ public class PageService {
 
         return list;
     }
-
-
 }

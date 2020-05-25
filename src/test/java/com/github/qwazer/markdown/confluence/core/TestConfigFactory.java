@@ -10,15 +10,12 @@ import java.util.ArrayList;
  */
 public class TestConfigFactory {
 
-
-
     public static ConfluenceConfig.Page getPage(){
         ConfluenceConfig.Page page = new ConfluenceConfig.Page();
         page.setSrcFile(new File("README.md"));
         page.setTitle("README.md");
         return page;
     }
-
 
     public static  ConfluenceConfig testConfluenceConfig(){
         ConfluenceConfig config = new ConfluenceConfig();
@@ -37,5 +34,4 @@ public class TestConfigFactory {
         final byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
         return new String(base64CredsBytes);
     }
-
 }
