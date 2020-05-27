@@ -21,14 +21,12 @@ public class AttachmentService {
 
         try {
             String attachmentId = confluenceService.getAttachmentId(pageId, filePath.getFileName().toString());
-            System.out.println("attachmentId: " + attachmentId);
             if (attachmentId == null) {
                 confluenceService.createAttachment(pageId, filePath.toString());
             } else {
                 confluenceService.updateAttachment(pageId, attachmentId, filePath.toString());
             }
-        } catch (
-                HttpStatusCodeException e) {
+        } catch (HttpStatusCodeException e) {
             throw new ConfluenceException(e.getResponseBodyAsString(), e);
         }
     }

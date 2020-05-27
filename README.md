@@ -16,6 +16,8 @@ buildscript {
         classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.9.1'
     }
 }
+
+apply plugin: 'com.github.qwazer.markdown-confluence'
 ```
 
 Sample config
