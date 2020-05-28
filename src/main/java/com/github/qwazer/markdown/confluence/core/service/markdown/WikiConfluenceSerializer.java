@@ -54,8 +54,8 @@ public abstract class WikiConfluenceSerializer implements Visitor {
 
     /**
      *
-     * @param text
-     * @param node
+     * @param text blah
+     * @param node blah
      * @return [line,col]
      */
     public static int[] lineAndColFromNode(String text, Node node) {

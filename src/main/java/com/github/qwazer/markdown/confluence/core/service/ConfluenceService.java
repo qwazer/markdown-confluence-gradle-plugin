@@ -262,7 +262,6 @@ public class ConfluenceService {
         return jsonObject;
     }
 
-
     public Long findAncestorId(String title) {
         LOG.info("Try to find ancestorId by title {}", title);
 
@@ -301,8 +300,6 @@ public class ConfluenceService {
 
     public String getAttachmentId(Long pageId, String attachmentFilename) {
 
-        System.out.println("getAttachmentId");
-
         final HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
 
         URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
@@ -311,19 +308,15 @@ public class ConfluenceService {
                 .buildAndExpand(pageId)
                 .toUri();
 
-        System.out.println("targetUrl: " + targetUrl);
-
         final HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
                 HttpMethod.GET, requestEntity, String.class);
 
-        LOG.debug("Response of creating page: {}", responseEntity.getBody());
+        LOG.debug("Response of creating attachment: {}", responseEntity.getBody());
 
         return parseAttachmentIdFromResponse(responseEntity);
     }
 
     public void createAttachment(Long pageId, String filePath) {
-        System.out.println("createAttachment");
-
         URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
                 .path("/content/{id}/child/attachment")
                 .buildAndExpand(pageId)
@@ -332,8 +325,6 @@ public class ConfluenceService {
     }
 
     public void updateAttachment(Long pageId, String attachmentId, String filePath) {
-        System.out.println("updateAttachment");
-
         URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
                 .path("/content/{pageId}/child/attachment/{attachmentId}/data")
                 .buildAndExpand(pageId, attachmentId)
