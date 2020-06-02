@@ -81,19 +81,19 @@ Can conflict with Spring Boot 1.x. Please vote for [#9](https://github.com/qwaze
 ### Description of config parameters
 
 
-parameter | datatype | optional | description
------------- | ------------- | -------------| -------------
-authentication | String | no | 'user:pass'.bytes.encodeBase64().toString()
-restApiUrl | String | no |  Confluence REST API URL
-spaceKey | String | no |  Confluence space key
-sslTrustAll | Boolean | yes |  Setting to ignore self-signed and unknown sertificate errors. Usefull in some corporate enviroments
-pageVariables | Map<String,String> | yes | Map of page variables, for example ```${project.name}``` in source file content will substituted by value of variable
-parseTimeout | Long | yes | Timeout parameter for Markdown serializer
-pages | Closure | no | Collection of Page Closures. If this config contain several pages, these will be ordered according their parent-child relationship
-page.parentTitle  | String | no | Parent page title, will use to resovle actual page ancestorId  against Confluence instance
-page.title  | String | no | Page title
-page.srcFile  | File | no | File with source of wiki page in markdown format (can be mixed with [Confluence Wiki Markup](https://confluence.atlassian.com/doc/confluence-wiki-markup-251003035.html))
-page.labels  | Collection<String> | no | Collection of labels of the Confluence page
+| parameter        | datatype           | optional | description                                                                                                                                                               |
+|:-----------------|:-------------------|:---------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| authentication   | String             | no       | 'user:pass'.bytes.encodeBase64().toString()                                                                                                                               |
+| restApiUrl       | String             | no       | Confluence REST API URL                                                                                                                                                   |
+| spaceKey         | String             | no       | Confluence space key                                                                                                                                                      |
+| sslTrustAll      | Boolean            | yes      | Setting to ignore self-signed and unknown sertificate errors. Usefull in some corporate enviroments                                                                       |
+| pageVariables    | Map<String,String> | yes      | Map of page variables, for example ```${project.name}``` in source file content will substituted by value of variable                                                     |
+| parseTimeout     | Long               | yes      | Timeout parameter for Markdown serializer                                                                                                                                 |
+| pages            | Closure            | no       | Collection of Page Closures. If this config contain several pages, these will be ordered according their parent-child relationship                                        |
+| page.parentTitle | String             | no       | Parent page title, will use to resovle actual page ancestorId  against Confluence instance                                                                                |
+| page.title       | String             | no       | Page title                                                                                                                                                                |
+| page.srcFile     | File               | no       | File with source of wiki page in markdown format (can be mixed with [Confluence Wiki Markup](https://confluence.atlassian.com/doc/confluence-wiki-markup-251003035.html)) |
+| page.labels      | Collection<String> | no       | Collection of labels of the Confluence page                                                                                                                               |
 
 
 
