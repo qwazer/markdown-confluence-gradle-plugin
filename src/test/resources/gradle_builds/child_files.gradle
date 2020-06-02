@@ -10,8 +10,6 @@ buildscript {
 
 apply plugin: 'com.github.qwazer.markdown-confluence'
 
-
-
 confluence {
     authentication 'admin:admin'.bytes.encodeBase64().toString()
     restApiUrl 'http://localhost:8090/rest/api/'

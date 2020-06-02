@@ -8,8 +8,8 @@ package com.github.qwazer.markdown.confluence.core.service.markdown;
 
 /**
  *
- * @param <R>
- * @param <P>
+ * @param <R> the function's return type
+ * @param <P> the function's parameter type
  */
 public interface F<R, P> {
 

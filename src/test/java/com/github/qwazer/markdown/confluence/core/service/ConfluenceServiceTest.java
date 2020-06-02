@@ -45,7 +45,6 @@ public class ConfluenceServiceTest {
     @Before
     public void setUp() throws Exception {
         confluenceService.setConfluenceConfig(confluenceConfig);
-
     }
 
     @Test

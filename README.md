@@ -1,11 +1,11 @@
 [![Build Status](https://travis-ci.org/qwazer/markdown-confluence-gradle-plugin.svg?branch=master)](https://travis-ci.org/qwazer/markdown-confluence-gradle-plugin)
 
 # markdown-confluence-gradle-plugin
-Gradle plugin to publish markdown pages to confluence 
+Gradle plugin to publish markdown pages to confluence. 
 
-## Usage and sample configuration
+## Usage and sample configuration.
 
-Add next lines to ``build.gradle`` 
+Add the following lines to ``build.gradle`` 
 
 ```groovy
 buildscript {
@@ -16,6 +16,8 @@ buildscript {
         classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.9.1'
     }
 }
+
+apply plugin: 'com.github.qwazer.markdown-confluence'
 ```
 
 Sample config
@@ -45,8 +47,8 @@ confluence {
 }
 ```
 
-It's possible to define multuply pages with groovy closures.
-For example, next code snippet will define all *.md files inside src directory as confluence page 
+It's possible to define multiple pages with groovy closures.
+For example, the next code snippet will define all *.md files inside the src directory as confluence pages 
 with title baseFileName (stripped from path and extension) and parent page title 'parentTitle'.
 
 ```groovy
@@ -64,6 +66,13 @@ with title baseFileName (stripped from path and extension) and parent page title
 
 ```
 
+## Inline images.
+
+In versions 0.9.2 and up any image defined in your markdown page will be uploaded to as an 
+attachment to the page. So if you have, for example, `![alt text](uri "Title")` as an inline link
+to an image and the `uri` is the path to file on your filesystem then that file
+will be uploaded to the confluence page as an attachment, and a link to it
+will be inserted into the confluence page in the correct place.
 
 ### Note for Spring Boot user
 

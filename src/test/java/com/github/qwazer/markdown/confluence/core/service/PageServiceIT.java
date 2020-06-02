@@ -34,19 +34,19 @@ public class PageServiceIT {
         String url = TestConfigFactory.testConfluenceConfig().getRestApiUrl();
         Assume.assumeTrue( "Url should be available " + url ,
                 UrlChecker.pingConfluence(url, 500));
+        confluenceService.setConfluenceConfig(confluenceConfig);
     }
 
     @Test
     @Ignore
     public void testExistenseOfConfluence() throws Exception {
-
-        pageService.postWikiPageToConfluence(page, confluenceConfig, "test");
+        pageService.postWikiPageToConfluence(page, "test");
     }
 
     @Test
     @Ignore
     public void testSimple() throws Exception {
-        pageService.postWikiPageToConfluence(page, confluenceConfig, "h1.gradle-markdown-confluence\n" +
+        pageService.postWikiPageToConfluence(page, "h1.gradle-markdown-confluence\n" +
                 "\n" +
                 "Gradle plugin to publish markdown pages to confluence {code:java} java code;{code} _italic_");
     }
@@ -61,13 +61,11 @@ public class PageServiceIT {
         page.setParentTitle("HOME");
 
         try {
-            pageService.postWikiPageToConfluence(page, confluenceConfig, "{no_such_macros}");
+            pageService.postWikiPageToConfluence(page, "{no_such_macros}");
         } catch (ConfluenceException e) {
             assertTrue(e.getMessage().contains("The macro \'no_such_macros\' is unknown"));
             return;
         }
         fail();
-
     }
-
 }
