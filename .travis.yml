@@ -1,7 +1,5 @@
 language: java
 
-jdk:
-  - oraclejdk8
 
 install: echo "skip 'gradle assemble' step"
 script:
@@ -14,7 +12,5 @@ deploy:
   on:
     branch: master
     tags: true
-    # deploy only with oraclejdk8
-    condition: $JAVA_HOME = /usr/lib/jvm/java-8-oracle
 
 
