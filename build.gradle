@@ -35,6 +35,7 @@ dependencies {
     compile "org.springframework:spring-context:$SPRING_VERSION"
     compile "org.springframework:spring-web:$SPRING_VERSION"
     compile "com.jayway.jsonpath:json-path:2.4.0"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.12.3"
     compile "org.jsoup:jsoup:1.11.2"
     compile "org.pegdown:pegdown:1.6.0"
 
