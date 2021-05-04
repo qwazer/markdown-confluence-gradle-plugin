@@ -1,7 +1,6 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

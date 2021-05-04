@@ -5,7 +5,9 @@ import groovy.lang.Closure;
 import org.gradle.util.ConfigureUtil;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created by Anton Reshetnikov on 10 Nov 2016.

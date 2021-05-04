@@ -15,8 +15,8 @@
  */
 package com.github.qwazer.markdown.confluence.gradle.plugin;
 
-import com.github.qwazer.markdown.confluence.core.SpringConfig;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
+import com.github.qwazer.markdown.confluence.core.SpringConfig;
 import com.github.qwazer.markdown.confluence.core.service.MainService;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;

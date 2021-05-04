@@ -1,7 +1,5 @@
 package com.github.qwazer.markdown.confluence.core.model;
 
-import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-
 import java.util.Collection;
 
 /**
