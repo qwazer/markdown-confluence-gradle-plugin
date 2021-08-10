@@ -31,7 +31,7 @@ public class AttachmentServiceTest {
     // When postAttachmentToPage called
     // Then a ConfluenceException is thrown
     public void testGetAttachmentThrows() {
-        given(confluenceService.getAttachmentId(anyLong(), anyString())).willThrow(mock(HttpServerErrorException.InternalServerError.class));
+        given(confluenceService.getAttachmentId(anyLong(), anyString())).willThrow(new HttpServerErrorException(HttpStatus.SERVICE_UNAVAILABLE, ""));
 
         Long expectedPageId = 1L;
         Path expectedPath = Paths.get("/a/path/file.png");
