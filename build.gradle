@@ -6,8 +6,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath "com.gradle.publish:plugin-publish-plugin:0.14.0"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
     }
 }
 
@@ -21,7 +21,6 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.gradle.plugin-publish'
 
-sourceCompatibility = 1.7
 
 repositories {
     mavenCentral()
@@ -30,20 +29,20 @@ repositories {
 
 dependencies {
     compile gradleApi()
-    compile "org.slf4j:slf4j-api:1.7.25"
+    compile "org.slf4j:slf4j-api:1.7.32"
     compile "org.springframework:spring-core:$SPRING_VERSION"
     compile "org.springframework:spring-context:$SPRING_VERSION"
     compile "org.springframework:spring-web:$SPRING_VERSION"
-    compile "com.jayway.jsonpath:json-path:2.4.0"
-    compile "com.fasterxml.jackson.core:jackson-databind:2.12.3"
-    compile "org.jsoup:jsoup:1.11.2"
+    compile "com.jayway.jsonpath:json-path:2.6.0"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.12.4"
+    compile "org.jsoup:jsoup:1.14.1"
     compile "org.pegdown:pegdown:1.6.0"
 
 
     testCompile gradleTestKit()
-    testCompile "commons-io:commons-io:2.6"
-    testCompile "junit:junit:4.12"
-    testCompile "org.mockito:mockito-core:2.18.0"
+    testCompile "commons-io:commons-io:2.11.0"
+    testCompile "junit:junit:4.13.2"
+    testCompile "org.mockito:mockito-core:3.11.2"
     testCompile "org.springframework:spring-test:$SPRING_VERSION"
 }
 
