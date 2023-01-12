@@ -11,6 +11,10 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.github.ben-manes.versions" version "0.20.0"
+}
+
 group 'com.github.qwazer'
 version "$VERSION"
 description 'A plugin for publishing markdown or confluence wiki files to to an Atlassian Confluence server'
