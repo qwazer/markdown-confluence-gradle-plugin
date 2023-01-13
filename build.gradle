@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
@@ -20,7 +20,6 @@ version "$VERSION"
 description 'A plugin for publishing markdown or confluence wiki files to to an Atlassian Confluence server'
 
 apply plugin: 'java'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.gradle.plugin-publish'
@@ -33,22 +32,22 @@ repositories {
 
 
 dependencies {
-    compile gradleApi()
-    compile "org.slf4j:slf4j-api:1.7.25"
-    compile "org.springframework:spring-core:$SPRING_VERSION"
-    compile "org.springframework:spring-context:$SPRING_VERSION"
-    compile "org.springframework:spring-web:$SPRING_VERSION"
-    compile "com.jayway.jsonpath:json-path:2.4.0"
-    compile "com.fasterxml.jackson.core:jackson-databind:2.12.3"
-    compile "org.jsoup:jsoup:1.11.2"
-    compile "org.pegdown:pegdown:1.6.0"
+    implementation gradleApi()
+    implementation "org.slf4j:slf4j-api:1.7.25"
+    implementation "org.springframework:spring-core:$SPRING_VERSION"
+    implementation "org.springframework:spring-context:$SPRING_VERSION"
+    implementation "org.springframework:spring-web:$SPRING_VERSION"
+    implementation "com.jayway.jsonpath:json-path:2.4.0"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.12.3"
+    implementation "org.jsoup:jsoup:1.11.2"
+    implementation "org.pegdown:pegdown:1.6.0"
 
 
-    testCompile gradleTestKit()
-    testCompile "commons-io:commons-io:2.6"
-    testCompile "junit:junit:4.12"
-    testCompile "org.mockito:mockito-core:2.18.0"
-    testCompile "org.springframework:spring-test:$SPRING_VERSION"
+    testImplementation gradleTestKit()
+    testImplementation "commons-io:commons-io:2.6"
+    testImplementation "junit:junit:4.12"
+    testImplementation "org.mockito:mockito-core:2.18.0"
+    testImplementation "org.springframework:spring-test:$SPRING_VERSION"
 }
 
 
