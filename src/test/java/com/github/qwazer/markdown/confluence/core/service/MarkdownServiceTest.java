@@ -3,12 +3,12 @@ package com.github.qwazer.markdown.confluence.core.service;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
 import org.gradle.internal.impldep.com.amazonaws.util.StringMapBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.

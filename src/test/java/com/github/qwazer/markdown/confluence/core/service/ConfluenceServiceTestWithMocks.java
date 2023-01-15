@@ -2,8 +2,7 @@ package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
@@ -14,7 +13,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -24,7 +25,7 @@ public class ConfluenceServiceTestWithMocks {
 
     RestTemplate restTemplate;
 
-    @Before
+    @BeforeEach
     public void before() {
         restTemplate = mock(RestTemplate.class);
         confluenceService = new ConfluenceService(restTemplate);
