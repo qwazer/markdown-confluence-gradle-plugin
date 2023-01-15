@@ -1,23 +1,27 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
-import com.github.qwazer.markdown.confluence.core.*;
-import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
+import com.github.qwazer.markdown.confluence.core.ConfluenceException;
+import com.github.qwazer.markdown.confluence.core.SpringConfig;
+import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
+import com.github.qwazer.markdown.confluence.core.UrlChecker;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = SpringConfig.class)
 public class PageServiceIT {
 
@@ -29,22 +33,21 @@ public class PageServiceIT {
     private final ConfluenceConfig.Page page = TestConfigFactory.getPage();
 
 
-    @Before
+    @BeforeEach
     public void pingRestAPIUrl(){
         String url = TestConfigFactory.testConfluenceConfig().getRestApiUrl();
-        Assume.assumeTrue( "Url should be available " + url ,
-                UrlChecker.pingConfluence(url, 500));
+        assertTrue(UrlChecker.pingConfluence(url, 500), "Url should be available " + url );
         confluenceService.setConfluenceConfig(confluenceConfig);
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testExistenseOfConfluence() throws Exception {
         pageService.postWikiPageToConfluence(page, "test");
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testSimple() throws Exception {
         pageService.postWikiPageToConfluence(page, "h1.gradle-markdown-confluence\n" +
                 "\n" +
@@ -60,12 +63,8 @@ public class PageServiceIT {
         page.setTitle("temp");
         page.setParentTitle("HOME");
 
-        try {
-            pageService.postWikiPageToConfluence(page, "{no_such_macros}");
-        } catch (ConfluenceException e) {
-            assertTrue(e.getMessage().contains("The macro \'no_such_macros\' is unknown"));
-            return;
-        }
-        fail();
+        final Exception actualError = assertThrows(ConfluenceException.class, ()->pageService.postWikiPageToConfluence(page, "{no_such_macros}"));
+
+        assertThat(actualError.getMessage(), Matchers.containsString("The macro 'no_such_macros' is unknown"));
     }
 }

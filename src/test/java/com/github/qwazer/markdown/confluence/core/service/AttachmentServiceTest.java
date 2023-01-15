@@ -1,18 +1,21 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.ConfluenceException;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.http.HttpStatus;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class AttachmentServiceTest {
 
@@ -20,13 +23,13 @@ public class AttachmentServiceTest {
 
     ConfluenceService confluenceService;
 
-    @Before
+    @BeforeEach
     public void before() {
         confluenceService = mock(ConfluenceService.class);
         attachmentService = new AttachmentService(confluenceService);
     }
 
-    @Test (expected = ConfluenceException.class)
+    @Test
     // Given confluenceService.getAttachmentId throws an HttpStatusCodeException
     // When postAttachmentToPage called
     // Then a ConfluenceException is thrown
@@ -36,7 +39,7 @@ public class AttachmentServiceTest {
         Long expectedPageId = 1L;
         Path expectedPath = Paths.get("/a/path/file.png");
 
-        attachmentService.postAttachmentToPage(expectedPageId, expectedPath);
+        assertThrows(ConfluenceException.class, () -> attachmentService.postAttachmentToPage(expectedPageId, expectedPath));
 
         verifyZeroInteractions(confluenceService);
     }

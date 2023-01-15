@@ -5,28 +5,25 @@ import com.github.qwazer.markdown.confluence.core.SpringConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
 import com.github.qwazer.markdown.confluence.core.UrlChecker;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.gradle.internal.impldep.org.hamcrest.MatcherAssert.assertThat;
+import static org.gradle.internal.impldep.org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by Anton Reshetnikov on 24 Nov 2016.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = SpringConfig.class)
 public class ConfluenceServiceTest {
 
@@ -35,14 +32,13 @@ public class ConfluenceServiceTest {
     private final ConfluenceConfig confluenceConfig = TestConfigFactory.testConfluenceConfig();
     private final ConfluenceConfig.Page page = TestConfigFactory.getPage();
 
-    @Before
-    public void pingRestAPIUrl(){
+    @BeforeEach
+    public void pingRestAPIUrl() {
         String url = TestConfigFactory.testConfluenceConfig().getRestApiUrl();
-        Assume.assumeTrue( "Url should be available " + url ,
-                UrlChecker.pingConfluence(url, 500));
+        assertTrue(UrlChecker.pingConfluence(url, 500), "Url should be available " + url);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         confluenceService.setConfluenceConfig(confluenceConfig);
     }
@@ -51,8 +47,7 @@ public class ConfluenceServiceTest {
     public void testFindAncestorId() throws Exception {
         confluenceService.setConfluenceConfig(confluenceConfig);
         Long id = confluenceService.findAncestorId(confluenceConfig.getSpaceKey());
-        assertNotNull(id);
-
+        assertThat(id, notNullValue());
     }
 
 
@@ -66,7 +61,7 @@ public class ConfluenceServiceTest {
 
 
     @Test
-    @Ignore
+    @Disabled
     public void testCreatePageWithUnkownMacro() throws Exception {
         ConfluencePage page = new ConfluencePage();
         page.setTitle("temp-" + UUID.randomUUID().toString());
