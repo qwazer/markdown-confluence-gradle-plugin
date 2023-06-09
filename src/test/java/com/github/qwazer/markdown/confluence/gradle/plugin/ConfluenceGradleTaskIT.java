@@ -9,7 +9,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
 
-import static com.github.qwazer.markdown.confluence.gradle.plugin.TestHelperUtil.readCurrentVerion;
+import static com.github.qwazer.markdown.confluence.gradle.plugin.TestHelperUtil.readCurrentVersion;
 import static com.github.qwazer.markdown.confluence.gradle.plugin.TestHelperUtil.writeFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -48,7 +48,7 @@ public class ConfluenceGradleTaskIT {
     public void testConfluenceTask() throws IOException {
 
         String content = IOUtils.toString(this.getClass().getResource("/gradle_builds/sample_build.gradle")) ;
-        String version = readCurrentVerion();
+        String version = readCurrentVersion();
         content = content.replaceAll("\\$VERSION", version);
         writeFile(buildFile, content);
         writeFile(readmeFile, "#hello \n${project.name}");
@@ -67,7 +67,7 @@ public class ConfluenceGradleTaskIT {
     public void testConfluenceTaskWithChildFiles() throws IOException {
 
         String content = IOUtils.toString(this.getClass().getResource("/gradle_builds/child_files.gradle")) ;
-        String version = readCurrentVerion();
+        String version = readCurrentVersion();
         content = content.replaceAll("\\$VERSION", version);
         writeFile(buildFile, content);
         writeFile(readmeFile, "#hello \n${project.name}");
@@ -86,7 +86,7 @@ public class ConfluenceGradleTaskIT {
     public void testVerboseError() throws IOException {
 
         String content = IOUtils.toString(this.getClass().getResource("/gradle_builds/sample_build.gradle")) ;
-        String version = readCurrentVerion();
+        String version = readCurrentVersion();
         content = content.replaceAll("\\$VERSION", version);
         writeFile(buildFile, content);
         writeFile(readmeFile, "${strange_macro}");

@@ -149,4 +149,16 @@ public class ConfluenceServiceTestWithMocks {
         String name = file.getFile().getName();
         assertEquals(name, attachmentFilename);
     }
+
+    @Test
+    public void testAuthorizationHeaderWhenBasicAuthenticationIsUsed() {
+        assertEquals(String.format("Basic %s", TestConfigFactory.getAuth()), confluenceService.getHttpHeaders().get("Authorization").get(0));
+    }
+
+    @Test
+    public void testAuthorizationHeaderWhenPatAuthenticationIsUsed() {
+        confluenceService.setConfluenceConfig(TestConfigFactory.testPatConfluenceConfig());
+        assertEquals("Bearer token", confluenceService.getHttpHeaders().get("Authorization").get(0));
+    }
+
 }

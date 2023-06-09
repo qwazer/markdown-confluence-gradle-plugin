@@ -52,22 +52,22 @@ public class ConfluenceService {
 
     public void setConfluenceConfig(ConfluenceConfig confluenceConfig) {
         this.confluenceConfig = confluenceConfig;
-        httpHeaders = buildHttpHeaders(confluenceConfig.getAuthentication());
-        httpHeadersForAttachment = buildHttpHeadersForAttachment(confluenceConfig.getAuthentication());
+        httpHeaders = buildHttpHeaders(confluenceConfig);
+        httpHeadersForAttachment = buildHttpHeadersForAttachment(confluenceConfig);
     }
 
-    private static HttpHeaders buildHttpHeaders(final String confluenceAuthentication) {
+    private static HttpHeaders buildHttpHeaders(final ConfluenceConfig config) {
         final HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", String.format("Basic %s", confluenceAuthentication));
+        headers.set("Authorization", config.getAuthenticationType().getAuthorizationHeader(config));
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
         return headers;
     }
 
-    private static HttpHeaders buildHttpHeadersForAttachment(final String confluenceAuthentication) {
+    private static HttpHeaders buildHttpHeadersForAttachment(final ConfluenceConfig config) {
         final HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", String.format("Basic %s", confluenceAuthentication));
+        headers.set("Authorization", config.getAuthenticationType().getAuthorizationHeader(config));
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.set("X-Atlassian-Token", "no-check");
@@ -343,5 +343,12 @@ public class ConfluenceService {
         HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
                 HttpMethod.POST, multiValueMapHttpEntity, String.class);
         LOG.debug("Response of adding attachment: {}", responseEntity.getBody());
+    }
+
+    /*
+     * Package-private access so that it's visible in tests.
+     */
+    HttpHeaders getHttpHeaders() {
+        return httpHeaders;
     }
 }
