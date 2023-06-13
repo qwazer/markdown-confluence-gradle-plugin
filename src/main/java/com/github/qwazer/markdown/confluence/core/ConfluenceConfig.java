@@ -16,6 +16,7 @@ public class ConfluenceConfig {
 
     public static final long DEFAULT_PARSE_TIMEOUT = 2000L;
 
+    private AuthenticationType authenticationType = AuthenticationType.BASIC;
     private String authentication;
     private String restApiUrl;
     private String spaceKey;
@@ -40,6 +41,14 @@ public class ConfluenceConfig {
 
     public void setSslTrustAll(boolean sslTrustAll) {
         this.sslTrustAll = sslTrustAll;
+    }
+
+    public AuthenticationType getAuthenticationType() {
+        return authenticationType;
+    }
+
+    public void setAuthenticationType(AuthenticationType authenticationType) {
+        this.authenticationType = authenticationType;
     }
 
     public String getAuthentication() {
@@ -92,6 +101,29 @@ public class ConfluenceConfig {
         return this.parseTimeout;
     }
 
+    /**
+     * Authentication strategy to use when interacting with Confluence APIs.
+     */
+    public enum AuthenticationType {
+        /**
+         * Use username/password combination (a.k.a. basic authentication) to authenticate Confluence API calls.
+         */
+        BASIC("Basic"),
+        /**
+         * Use Personal Access Token (PAT) to authenticate Confluence API calls.
+         */
+        PAT("Bearer");
+
+        private final String authorizationHeaderPrefix;
+
+        private AuthenticationType(String authorizationHeaderPrefix) {
+            this.authorizationHeaderPrefix = authorizationHeaderPrefix;
+        }
+
+        public String getAuthorizationHeader(ConfluenceConfig config) {
+            return String.format("%s %s", authorizationHeaderPrefix, config.getAuthentication());
+        }
+    }
 
     public static class PagesHolder {
 
