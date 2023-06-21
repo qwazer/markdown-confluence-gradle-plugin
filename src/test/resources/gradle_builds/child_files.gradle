@@ -2,6 +2,7 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:$VERSION'
@@ -13,7 +14,7 @@ apply plugin: 'com.github.qwazer.markdown-confluence'
 confluence {
     authentication 'admin:admin'.bytes.encodeBase64().toString()
     restApiUrl 'http://localhost:8090/rest/api/'
-    spaceKey 'SAMPLE'
+    spaceKey 'ds'
     sslTrustAll true
     pageVariables = ['project.name': project.name]
 
@@ -28,7 +29,7 @@ confluence {
                 .include('**/*.md')
                 .collect { file ->
             page {
-                parentTitle = 'projectName'
+                parentTitle = 'Welcome to Confluence'
                 title = file.name.take(file.name.lastIndexOf('.'))
                 srcFile = file
                 labels = ['release-notes', "${project.name}-release-notes"]
