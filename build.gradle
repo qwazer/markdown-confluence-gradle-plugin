@@ -7,7 +7,6 @@ buildscript {
     }
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
     }
 }
 
@@ -21,7 +20,6 @@ description 'A plugin for publishing markdown or confluence wiki files to to an 
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.gradle.plugin-publish'
 
 repositories {
@@ -49,32 +47,11 @@ dependencies {
 
 
     testImplementation gradleTestKit()
-    testImplementation "commons-io:commons-io:2.6"
-    testImplementation "junit:junit:4.12"
+    testImplementation 'commons-io:commons-io:2.7'
+    testImplementation 'junit:junit:4.13.1'
     testImplementation "org.mockito:mockito-core:2.18.0"
     testImplementation "org.springframework:spring-test:$SPRING_VERSION"
 }
-
-
-bintray {
-    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    publications = ['MyPublication']
-    pkg {
-        repo = project.hasProperty('bintrayRepo') ? project.property('bintrayRepo') : System.getenv('BINTRAY_REPO')
-        name = 'markdown-confluence-gradle-plugin'
-        userOrg = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin.git'
-        websiteUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin'
-        issueTrackerUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin/issues'
-        labels = ['markdown','confluence']
-        version {
-            name = project.version
-        }
-    }
-}
-
 
 
 publishing {
