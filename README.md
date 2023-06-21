@@ -10,10 +10,10 @@ Add the following lines to ``build.gradle``
 ```groovy
 buildscript {
     repositories {
-        jcenter()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.9.2'
+        classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.9.3'
     }
 }
 

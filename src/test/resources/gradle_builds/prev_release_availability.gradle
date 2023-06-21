@@ -1,9 +1,7 @@
 buildscript {
     repositories {
-//        maven {
-//            url "http://dl.bintray.com/qwazer/maven"
-//        }
-        jcenter()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath 'com.github.qwazer:markdown-confluence-gradle-plugin:0.9.2'
@@ -16,12 +14,12 @@ confluence {
 
     authentication 'admin:admin'.bytes.encodeBase64().toString()
     restApiUrl 'https://acme.com:8090/rest/api/'
-    spaceKey 'SAMPLE'
+    spaceKey 'ds'
     sslTrustAll true
 
     pages {
         page {
-            parentTitle 'Home'
+            parentTitle 'Welcome to Confluence'
             title 'projectName'
             srcFile = file('README.md')
         }
