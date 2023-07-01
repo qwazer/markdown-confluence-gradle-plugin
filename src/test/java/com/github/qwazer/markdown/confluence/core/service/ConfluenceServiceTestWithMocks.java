@@ -1,10 +1,18 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import org.mockito.hamcrest.MockitoHamcrest;
+import org.mockito.plugins.MockMaker;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -15,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -37,11 +46,13 @@ public class ConfluenceServiceTestWithMocks {
     // When getAttachmentId called
     // Then the returned attachmentId is correct
     public void testGetAttachmentId_attachment_does_not_exist() {
-        String expectedBody = "{ \"results\": [] }";
+        final var responseBody = new ObjectNode(JsonNodeFactory.instance);
+        responseBody.set("results", new ArrayNode(JsonNodeFactory.instance));
 
-        ResponseEntity<String> responseEntity = mock(ResponseEntity.class);
-        given(responseEntity.getBody()).willReturn(expectedBody);
-        given(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class))).willReturn((ResponseEntity<String>) responseEntity);
+        ResponseEntity<JsonNode> responseEntity = mock(ResponseEntity.class);
+        given(responseEntity.getBody()).willReturn(responseBody);
+        given(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(JsonNode.class)))
+            .willReturn(responseEntity);
 
         Long pageId = 1L;
         String attachmentFilename = "file.png";
@@ -50,14 +61,15 @@ public class ConfluenceServiceTestWithMocks {
 
         ArgumentCaptor<URI> captor = ArgumentCaptor.forClass(URI.class);
 
-        verify(restTemplate).exchange(captor.capture(), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class));
+        verify(restTemplate)
+            .exchange(captor.capture(), eq(HttpMethod.GET), any(HttpEntity.class), eq(JsonNode.class));
         verifyNoMoreInteractions(restTemplate);
 
         URI actualURI = captor.getValue();
         assertEquals(String.format("/rest/api/content/%d/child/attachment", pageId), actualURI.getPath());
         assertEquals(String.format("filename=%s", attachmentFilename), actualURI.getQuery());
 
-        assertEquals(null, actualAttachmentId);
+        assertNull(actualAttachmentId);
     }
 
     @Test
@@ -66,20 +78,32 @@ public class ConfluenceServiceTestWithMocks {
     // Then the returned attachmentId is correct
     public void testGetAttachmentId_attachment_exists() {
         String expectedAttachmentId = "1234";
-        String expectedBody = String.format("{ \"results\": [ { \"id\": \"%s\" } ] }", expectedAttachmentId);
+//        String expectedBody = String.format("{ \"results\": [ { \"id\": \"%s\" } ] }", expectedAttachmentId);
+        final var expectedBody = new ObjectNode(JsonNodeFactory.instance)
+            .set(
+                "results",
+                new ArrayNode(JsonNodeFactory.instance)
+                    .add(
+                        new ObjectNode(JsonNodeFactory.instance)
+                            .put("id", expectedAttachmentId)
+                    )
+            );
+        System.out.println(expectedBody.toString());
 
-        ResponseEntity<String> responseEntity = mock(ResponseEntity.class);
+        ResponseEntity<JsonNode> responseEntity = mock(ResponseEntity.class);
         given(responseEntity.getBody()).willReturn(expectedBody);
-        given(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class))).willReturn((ResponseEntity<String>) responseEntity);
+        given(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(JsonNode.class)))
+            .willReturn(responseEntity);
 
         Long pageId = 1L;
         String attachmentFilename = "file.png";
 
-        String actualAttachmentId = confluenceService.getAttachmentId(pageId, attachmentFilename);
+        String actualAttachmentId =
+            confluenceService.getAttachmentId(pageId, attachmentFilename);
 
         ArgumentCaptor<URI> captor = ArgumentCaptor.forClass(URI.class);
 
-        verify(restTemplate).exchange(captor.capture(), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class));
+        verify(restTemplate).exchange(captor.capture(), eq(HttpMethod.GET), any(HttpEntity.class), eq(JsonNode.class));
         verifyNoMoreInteractions(restTemplate);
 
         URI actualURI = captor.getValue();

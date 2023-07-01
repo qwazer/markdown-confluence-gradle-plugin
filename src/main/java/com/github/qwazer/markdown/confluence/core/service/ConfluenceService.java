@@ -1,14 +1,12 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import com.github.qwazer.markdown.confluence.core.ConfluenceException;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.PathNotFoundException;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +18,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.Nonnull;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
-
-import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
+import java.util.Objects;
 
 /**
  * Created by Anton Reshetnikov on 24 Nov 2016.
@@ -34,10 +31,15 @@ import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
 public class ConfluenceService {
     private static final Logger LOG = LoggerFactory.getLogger(ConfluenceService.class);
 
+    private static final String BODY = "body";
     private static final String EXPAND = "expand";
     private static final String ID = "id";
+    private static final String SPACE = "space";
     private static final String SPACE_KEY = "spaceKey";
     private static final String TITLE = "title";
+    private static final String TYPE = "type";
+    private static final String PAGE_VERSION = "version";
+    private static final String VERSION_NUMBER = "number";
 
     private final RestTemplate restTemplate;
 
@@ -52,26 +54,24 @@ public class ConfluenceService {
 
     public void setConfluenceConfig(ConfluenceConfig confluenceConfig) {
         this.confluenceConfig = confluenceConfig;
-        httpHeaders = buildHttpHeaders(confluenceConfig);
-        httpHeadersForAttachment = buildHttpHeadersForAttachment(confluenceConfig);
+        this.httpHeaders = buildHttpHeaders(confluenceConfig);
+        this.httpHeadersForAttachment = buildHttpHeadersForAttachment(confluenceConfig);
     }
 
     private static HttpHeaders buildHttpHeaders(final ConfluenceConfig config) {
-        final HttpHeaders headers = new HttpHeaders();
+        final var headers = new HttpHeaders();
         headers.set("Authorization", config.getAuthenticationType().getAuthorizationHeader(config));
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
 
     private static HttpHeaders buildHttpHeadersForAttachment(final ConfluenceConfig config) {
-        final HttpHeaders headers = new HttpHeaders();
+        final var headers = new HttpHeaders();
         headers.set("Authorization", config.getAuthenticationType().getAuthorizationHeader(config));
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.set("X-Atlassian-Token", "no-check");
-
         return headers;
     }
 
@@ -89,11 +89,10 @@ public class ConfluenceService {
                 .encode()
                 .toUri();
 
-        final ResponseEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.GET, requestEntity, String.class);
+        final ResponseEntity<JsonNode> responseEntity =
+                restTemplate.exchange(targetUrl, HttpMethod.GET, requestEntity, JsonNode.class);
 
-        ConfluencePage confluencePage = parseResponseEntityToConfluencePage(responseEntity);
-        return confluencePage;
+        return parseResponseEntityToConfluencePage(responseEntity.getBody());
     }
 
     public ConfluencePage findSpaceHomePage(final String spaceKey) {
@@ -108,11 +107,12 @@ public class ConfluenceService {
                 .encode()
                 .toUri();
 
-        final ResponseEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.GET, requestEntity, String.class);
-
-        ConfluencePage confluencePage = parseResponseEntityToConfluencePage(responseEntity);
-        return confluencePage;
+        final var responseBody = Objects.requireNonNull(
+                restTemplate
+                    .exchange(targetUrl, HttpMethod.GET, requestEntity, JsonNode.class)
+                    .getBody()
+            );
+        return parseResponseEntityToConfluencePage(responseBody);
     }
 
 
@@ -123,21 +123,23 @@ public class ConfluenceService {
                 .build()
                 .toUri();
 
+        final var pageVersion = new ObjectNode(JsonNodeFactory.instance);
+        pageVersion.put(VERSION_NUMBER, page.getVersion() + 1);
 
-        final JSONObject postVersionObject = new JSONObject();
-        postVersionObject.put("number", page.getVersion() + 1);
+        final var requestBody = buildPostBody(page);
+        requestBody.put(ID, page.getId());
+        requestBody.set(PAGE_VERSION, pageVersion);
 
-        final JSONObject postBody = buildPostBody(page);
-        postBody.put(ID, page.getId());
-        postBody.put("version", postVersionObject);
+        LOG.debug("Update page request: {}", requestBody);
 
-        final HttpEntity<String> requestEntity = new HttpEntity<>(postBody.toJSONString(), httpHeaders);
+        final var requestEntity = new HttpEntity<>(requestBody, httpHeaders);
+        final var responseBody = Objects.requireNonNull(
+                restTemplate
+                    .exchange(targetUrl, HttpMethod.PUT, requestEntity, JsonNode.class)
+                    .getBody()
+            );
 
-        LOG.debug("Request of updating page: {}", postBody);
-
-        final HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl, HttpMethod.PUT, requestEntity, String.class);
-
-        LOG.debug("Response of updating page: {}", responseEntity.getBody());
+        LOG.debug("Update page response: {}", responseBody);
 
     }
 
@@ -147,23 +149,24 @@ public class ConfluenceService {
                 .build()
                 .toUri();
 
-        final String jsonPostBody = buildPostBody(page).toJSONString();
+        final String jsonPostBody = buildPostBody(page).toPrettyString();
 
-        LOG.debug("Request of creating page: {}", jsonPostBody);
+        LOG.debug("Create page request: {}", jsonPostBody);
 
-        final HttpEntity<String> requestEntity = new HttpEntity<>(jsonPostBody, httpHeaders);
+        final var requestEntity = new HttpEntity<>(jsonPostBody, httpHeaders);
 
-        final HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.POST, requestEntity, String.class);
+        final var responseBody = Objects.requireNonNull(restTemplate
+                .postForEntity(targetUrl, requestEntity, JsonNode.class)
+                .getBody());
 
-        LOG.debug("Response of creating page: {}", responseEntity.getBody());
+        LOG.debug("Create page response: {}", responseBody.toPrettyString());
 
-        return parsePageIdFromResponse(responseEntity);
+        return parsePageIdFromResponse(responseBody);
     }
 
 
-    public void addLabels(Long pageId, Collection<String> labels) {
-        if (labels == null || labels.isEmpty())
+    public void addLabels(Long pageId, @Nonnull Collection<String> labels) {
+        if (labels.isEmpty())
             return;
 
         URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
@@ -171,133 +174,122 @@ public class ConfluenceService {
                 .buildAndExpand(pageId)
                 .toUri();
 
-        final String jsonPostBody = buildAddLabelsPostBody(labels);
+        final var jsonPostBody = buildAddLabelsPostBody(labels);
 
-        LOG.debug("Request of adding labels: {}", jsonPostBody);
-        HttpEntity<String> requestEntity = new HttpEntity<>(jsonPostBody, httpHeaders);
-        HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.POST, requestEntity, String.class);
-        LOG.debug("Response of adding labels: {}", responseEntity.getBody());
-
+        LOG.debug("Add labels request: {}", jsonPostBody);
+        final var requestEntity = new HttpEntity<>(jsonPostBody, httpHeaders);
+        final var responseBody = Objects.requireNonNull(
+            restTemplate
+                .postForEntity(targetUrl, requestEntity, JsonNode.class)
+                .getBody()
+        );
+        LOG.debug("Response of adding labels: {}", responseBody);
     }
 
 
-    private static String buildAddLabelsPostBody(Collection<String> labels) {
-        if (labels == null || labels.isEmpty()) return null;
-        JSONArray jsonArray = new JSONArray();
+    private static ArrayNode buildAddLabelsPostBody(@Nonnull Collection<String> labels) {
+        var arrayNode = new ArrayNode(JsonNodeFactory.instance);
         for (String s : labels) {
             if (s != null && !s.isEmpty()) {
-                JSONObject label = new JSONObject();
+                var label = new ObjectNode(JsonNodeFactory.instance);
                 label.put("prefix", "global");
                 label.put("name", s);
-                jsonArray.add(label);
+                arrayNode.add(label);
             }
         }
-        return jsonArray.toJSONString();
+        return arrayNode;
     }
 
-
-    protected static ConfluencePage parseResponseEntityToConfluencePage(ResponseEntity<String> responseEntity) {
-        final String jsonBody = responseEntity.getBody();
-
-        try {
-            LOG.debug("Try to parse response: {}", jsonBody);
-
-            final String id = JsonPath.read(jsonBody, "$.results[0].id");
-            final Integer version = JsonPath.read(jsonBody, "$.results[0].version.number");
-
-            final JSONArray ancestors = JsonPath.read(jsonBody, "$.results[0].ancestors");
-
-            ConfluencePage confluencePage = new ConfluencePage();
-
-            if (!ancestors.isEmpty()) {
-                final Map<String, Object> lastAncestor = (Map<String, Object>) ancestors.get(ancestors.size() - 1);
-                final Long ancestorId = Long.valueOf((String) lastAncestor.get(ID));
-
-                LOG.debug("ancestors: {} : {}, choose -> {}", ancestors.getClass().getName(), ancestors, ancestorId);
-
-
-                confluencePage.setAncestorId(ancestorId);
-            }
-
-            confluencePage.setId(Long.parseLong(id));
-            confluencePage.setVersion(version);
-
-            return confluencePage;
-
-        } catch (final PathNotFoundException e) {
+    protected static ConfluencePage parseResponseEntityToConfluencePage(JsonNode responseBody) {
+        if (responseBody == null) {
             return null;
         }
+
+        final var results = responseBody.get("results");
+        if (results != null) {
+            final var first = results.get(0);
+            if (first != null) {
+                final var confluencePage = new ConfluencePage();
+                confluencePage.setId(first.get("id").asLong());
+                confluencePage.setVersion(first.get("version").get("number").asInt());
+
+                final var ancestors = first.get("ancestors");
+                if (ancestors instanceof ArrayNode arrayNode && !arrayNode.isEmpty()) {
+                    final var ancestorId = arrayNode.get(arrayNode.size() - 1).get(ID).asLong();
+                    LOG.debug("ancestors: {} : {}, choose -> {}", ancestors.getClass().getName(), ancestors, ancestorId);
+                    confluencePage.setAncestorId(ancestorId);
+                }
+                return confluencePage;
+            }
+        }
+
+        return null;
     }
 
+    private ObjectNode buildPostBody(ConfluencePage confluencePage) {
 
-    private JSONObject buildPostBody(ConfluencePage confluencePage) {
+        final var spaceNode = new ObjectNode(JsonNodeFactory.instance);
+        spaceNode.put("key", confluenceConfig.getSpaceKey());
 
-        final JSONObject jsonSpaceObject = new JSONObject();
-        jsonSpaceObject.put("key", confluenceConfig.getSpaceKey());
+        final var storageData = new ObjectNode(JsonNodeFactory.instance);
+        storageData.put("value", confluencePage.getContent());
+        storageData.put("representation", "wiki");
 
-        final JSONObject jsonStorageObject = new JSONObject();
-        jsonStorageObject.put("value", confluencePage.getContent());
-        //  jsonStorageObject.put("representation", "storage");
-        jsonStorageObject.put("representation", "wiki");
+        final var storageNode = new ObjectNode(JsonNodeFactory.instance);
+        storageNode.set("storage", storageData);
 
-        final JSONObject jsonBodyObject = new JSONObject();
-        jsonBodyObject.put("storage", jsonStorageObject);
-
-        final JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "page");
-        jsonObject.put(TITLE, confluencePage.getTitle());
-        jsonObject.put("space", jsonSpaceObject);
-        jsonObject.put("body", jsonBodyObject);
+        final var bodyNode = new ObjectNode(JsonNodeFactory.instance);
+        bodyNode.put(TYPE, "page");
+        bodyNode.put(TITLE, confluencePage.getTitle());
+        bodyNode.set(SPACE, spaceNode);
+        bodyNode.set(BODY, storageNode);
 
         if (confluencePage.getAncestorId() != null) {
-            final JSONObject ancestor = new JSONObject();
+            final var ancestor = new ObjectNode(JsonNodeFactory.instance);
             ancestor.put("type", "page");
             ancestor.put(ID, confluencePage.getAncestorId());
 
-            final JSONArray ancestors = new JSONArray();
+            final var ancestors = new ArrayNode(JsonNodeFactory.instance);
             ancestors.add(ancestor);
 
-            jsonObject.put("ancestors", ancestors);
+            bodyNode.set("ancestors", ancestors);
         }
 
-        return jsonObject;
+        return bodyNode;
     }
 
     public Long findAncestorId(String title) {
-        LOG.info("Try to find ancestorId by title {}", title);
-
+        LOG.info("Looking up ancestor id by title {}", title);
         ConfluencePage page = findPageByTitle(title);
         if (page != null) {
             return page.getId();
         } else {
-            LOG.info("Try to use page home id as ancestorId", confluenceConfig.getSpaceKey());
-
+            LOG.info("Using page home id ({}) as ancestorId", confluenceConfig.getSpaceKey());
             ConfluencePage spaceHome = findSpaceHomePage(confluenceConfig.getSpaceKey());
             return spaceHome.getId();
         }
     }
 
-    private static Long parsePageIdFromResponse(final HttpEntity<String> responseEntity) {
-        final String responseJson = responseEntity.getBody();
-        final JSONParser jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
-
+    private static Long parsePageIdFromResponse(final JsonNode responseEntity) {
         try {
-            final JSONObject response = jsonParser.parse(responseJson, JSONObject.class);
-            return Long.valueOf((String) response.get(ID));
-        } catch (ParseException e) {
+            return responseEntity.get(ID).asLong();
+        } catch (Exception e) {
             throw new ConfluenceException("Error Parsing JSON Response from Confluence!", e);
         }
     }
 
-    private static String parseAttachmentIdFromResponse(final HttpEntity<String> responseEntity) {
-        final String jsonBody = responseEntity.getBody();
-
-        try {
-            return JsonPath.read(jsonBody, "$.results[0].id");
-        } catch (final PathNotFoundException e) {
-            return null;
+    private static String parseAttachmentIdFromResponse(final JsonNode responseEntity) {
+        final var results = responseEntity.get("results");
+        if (results != null) {
+            final var first = results.get(0);
+            if (first != null) {
+                final var id = first.get("id");
+                if (id != null) {
+                    return id.asText();
+                }
+            }
         }
+        return null;
     }
 
     public String getAttachmentId(Long pageId, String attachmentFilename) {
@@ -310,12 +302,15 @@ public class ConfluenceService {
                 .buildAndExpand(pageId)
                 .toUri();
 
-        final HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.GET, requestEntity, String.class);
+        final var responseBody = Objects.requireNonNull(
+            restTemplate
+                .exchange(targetUrl, HttpMethod.GET, requestEntity, JsonNode.class)
+                .getBody()
+        );
 
-        LOG.debug("Response of creating attachment: {}", responseEntity.getBody());
+        LOG.debug("Create attachment response: {}", responseBody.toPrettyString());
 
-        return parseAttachmentIdFromResponse(responseEntity);
+        return parseAttachmentIdFromResponse(responseBody);
     }
 
     public void createAttachment(Long pageId, String filePath) {
