@@ -1,8 +1,10 @@
 package com.github.qwazer.markdown.confluence.core.ssl;
 
-import javax.net.ssl.*;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
 
 /**
@@ -10,35 +12,40 @@ import java.security.cert.X509Certificate;
  */
 public class SslUtil {
 
-    public static void sslTrustAll() throws NoSuchAlgorithmException, KeyManagementException {
-        // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = new TrustManager[] {
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
+    // Not intended to be instantiated
+    private SslUtil() {}
 
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        // Trust always
-                    }
+    public static final X509TrustManager INSECURE_TRUST_MANAGER = new X509TrustManager() {
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) {
+        }
 
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        // Trust always
-                    }
-                }
-        };
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) {
+        }
 
-        // Install the all-trusting trust manager
-        SSLContext sc = SSLContext.getInstance("SSL");
-        // Create empty HostnameVerifier
-        HostnameVerifier hv = new HostnameVerifier() {
-            public boolean verify(String arg0, SSLSession arg1) {
-                return true;
-            }
-        };
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[] {};
+        }
+    };
 
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(hv);
+    public static final HostnameVerifier INSECURE_HOSTNAME_VERIFIER = (hostname, session) -> true;
+
+    public static final SSLContext INSECURE_SSL_CONTEXT;
+    static {
+        try {
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, new TrustManager[] { INSECURE_TRUST_MANAGER }, new java.security.SecureRandom());
+            INSECURE_SSL_CONTEXT = sslContext;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
+    public static void sslTrustAll() {
+        HttpsURLConnection.setDefaultSSLSocketFactory(INSECURE_SSL_CONTEXT.getSocketFactory());
+        HttpsURLConnection.setDefaultHostnameVerifier(INSECURE_HOSTNAME_VERIFIER);
+    }
+
 }

@@ -15,75 +15,103 @@
  */
 package com.github.qwazer.markdown.confluence.gradle.plugin;
 
-import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.SpringConfig;
-import com.github.qwazer.markdown.confluence.core.service.MainService;
+import com.github.qwazer.markdown.confluence.core.OkHttpUtils;
+import com.github.qwazer.markdown.confluence.core.Utils;
+import com.github.qwazer.markdown.confluence.core.service.AttachmentService;
+import com.github.qwazer.markdown.confluence.core.service.ConfluenceService;
+import com.github.qwazer.markdown.confluence.core.service.MarkdownService;
+import com.github.qwazer.markdown.confluence.core.service.PageService;
+import com.github.qwazer.markdown.confluence.core.ssl.SslUtil;
+import okhttp3.OkHttpClient;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.util.Assert;
 
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
-
-import static com.github.qwazer.markdown.confluence.core.ssl.SslUtil.sslTrustAll;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
 
 public class ConfluenceGradleTask extends DefaultTask {
 
     @TaskAction
-    public void confluence() throws NoSuchAlgorithmException, KeyManagementException, IOException {
-        final AnnotationConfigApplicationContext annotationConfigApplicationContext =
-                new AnnotationConfigApplicationContext(SpringConfig.class);
-        final MainService mainService = annotationConfigApplicationContext
-                .getBean(MainService.class);
+    public void confluence() throws IOException {
 
-        final ConfluenceConfig confluenceConfig = getProject().getExtensions().findByType(ConfluenceConfig.class);
+        // obtaining plugins configuration
+        final ConfluenceExtension extension =
+            Objects.requireNonNull(getProject().getExtensions().findByType(ConfluenceExtension.class));
 
-        validate(confluenceConfig);
-
-        if (confluenceConfig.isSslTrustAll()){
-            sslTrustAll();
-        }
-
-        mainService.processAll(confluenceConfig);
-        annotationConfigApplicationContext.close();
-    }
-
-
-    protected static void validate(ConfluenceConfig config){
-        Assert.notNull(config);
-        Assert.hasLength(config.getRestApiUrl());
-        Assert.hasLength(config.getSpaceKey());
-        Assert.notNull(config.getPages());
-
-        for (ConfluenceConfig.Page page :config.getPages()){
-            Assert.hasLength(page.getParentTitle());
-            Assert.hasLength(page.getTitle());
-            Assert.notNull(page.getSrcFile());
-            Assert.isTrue(!page.getParentTitle().equals(page.getTitle()), String.format("Page with title %s cannot be parent of itself ", page.getTitle()));
-        }
-        validateNoDuplicates(config.getPages());
-    }
-
-    protected static void validateNoDuplicates(Collection<ConfluenceConfig.Page> pages) {
-
-        Set<ConfluenceConfig.Page> set = new TreeSet<>(new Comparator<ConfluenceConfig.Page>() {
-            @Override
-            public int compare(ConfluenceConfig.Page o1, ConfluenceConfig.Page o2) {
-                return o1.getTitle().compareTo(o2.getTitle());
-            }
+        // validating each and every page configured
+        extension.getConfiguredPages().forEach(page -> {
+            // the referenced markdown file must exist
+            Utils.require(Files.exists(page.getSrcFile().toPath()), "File not found: " + page.getSrcFile());
+            // page title and page parentTitle must not be same
+            Utils.require(
+                !page.getTitle().equals(page.getParentTitle()),
+                String.format("Page title cannot be the same as page parent title: \"%s\"", page.getTitle())
+            );
+            // page title cannot be empty/blank
+            Utils.require(page.isTitleSet(), "Page title cannot be blank/empty");
+            // page parent's title cannot be empty/blank
+            Utils.require(page.isParentTitleSet(), "Parent's title cannot be blank/empty");
         });
 
-        set.addAll(pages);
+        final AuthenticationType authenticationType =
+            extension.getAuthenticationType().getOrElse(AuthenticationType.BASIC);
+        final String authentication = extension.getAuthentication().get();
+        final String authorizationHeader = authenticationType.getAuthorizationHeader(authentication);
+        final OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder()
+            .connectTimeout(Duration.ofSeconds(30))
+            .readTimeout(Duration.ofSeconds(60))
+            .writeTimeout(Duration.ofSeconds(60))
+            .addInterceptor(OkHttpUtils.getAuthorizationInterceptor(authorizationHeader));
 
-        if (set.size() < pages.size()) {
-            throw new IllegalArgumentException("Found duplicate pageTitle in confluence pages");
+        final boolean sslTrustAll = extension.getSslTrustAll().getOrElse(false);
+        if (sslTrustAll) {
+            httpClientBuilder
+                .sslSocketFactory(SslUtil.INSECURE_SSL_CONTEXT.getSocketFactory(), SslUtil.INSECURE_TRUST_MANAGER);
+            httpClientBuilder.hostnameVerifier((hostname, session) -> true);
         }
+
+        final OkHttpClient httpClient = httpClientBuilder.build();
+
+        final String restApiUrl;
+        try {
+            restApiUrl = new URL(extension.getRestApiUrl().get()).toString();
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid restApiUrl value supplied: " + extension.getRestApiUrl().get());
+        }
+
+        final String spaceKey = extension.getSpaceKey().get();
+        Utils.require(!spaceKey.trim().isEmpty(), "Confluence space key cannot be blank/empty");
+
+        // Creating components that implement plugin's logic
+        final ConfluenceService confluenceService = new ConfluenceService(restApiUrl, spaceKey, httpClient);
+
+        final Long parseTimeout = extension.getParseTimeout().getOrNull();
+        final MarkdownService markdownService;
+        if (parseTimeout == null) {
+            markdownService = new MarkdownService();
+        } else {
+            markdownService = new MarkdownService(parseTimeout);
+        }
+        final AttachmentService attachmentService = new AttachmentService(confluenceService);
+        final PageService pageService =
+            new PageService(confluenceService, attachmentService, markdownService);
+        final Map<String, String> pageVariables =
+            extension.getPageVariables().getOrElse(Collections.emptyMap());
+
+        // Publishing pages
+        extension.getPages().forEach(page -> {
+            try {
+                pageService.publishWikiPage(page, pageVariables);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 }

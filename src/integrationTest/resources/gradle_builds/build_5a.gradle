@@ -1,0 +1,14 @@
+plugins {
+    id 'com.github.qwazer.markdown-confluence'
+}
+
+subprojects {
+    pluginManager.withPlugin('com.github.qwazer.markdown-confluence') {
+        confluence {
+            authentication = 'admin:admin'.bytes.encodeBase64().toString()
+            restApiUrl = 'http://localhost:8090/rest/api/'
+            spaceKey = 'SN'
+            sslTrustAll = true
+        }
+    }
+}

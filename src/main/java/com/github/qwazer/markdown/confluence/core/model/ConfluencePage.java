@@ -1,6 +1,8 @@
 package com.github.qwazer.markdown.confluence.core.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
@@ -12,7 +14,7 @@ public class ConfluencePage {
     private Long id;
     private Integer version;
     private String content;
-    private Collection<String> labels;
+    private Collection<String> labels = new ArrayList<>();
 
     public Long getAncestorId() {
         return ancestorId;
@@ -60,6 +62,8 @@ public class ConfluencePage {
     }
 
     public void setLabels(Collection<String> labels) {
+        Objects.requireNonNull(labels);
         this.labels = labels;
     }
+
 }

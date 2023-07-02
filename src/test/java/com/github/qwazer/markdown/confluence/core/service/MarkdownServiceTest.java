@@ -1,10 +1,8 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
-import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
-import com.github.qwazer.markdown.confluence.core.TestConfigFactory;
-import org.gradle.internal.impldep.com.amazonaws.util.StringMapBuilder;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
@@ -15,68 +13,52 @@ import static org.junit.Assert.assertTrue;
  */
 public class MarkdownServiceTest {
 
-
-    private MarkdownService markdown2XtmlService = new MarkdownService();
-    private ConfluenceConfig confluenceConfig = TestConfigFactory.testConfluenceConfig();
-
+    private final MarkdownService markdownService = new MarkdownService();
 
     @Test
-    public void testReplaceProperties() throws Exception {
+    public void testReplaceProperties() {
 
-        String content = "# ${project.name} \n" +
-                "Gradle plugin to publish markdown pages to confluence ```` java code;```` _italic_";
-        String projectName = "HELLO_PROJECT";
-        String key = "project.name";
-        assertTrue(content.contains("${"+key +"}"));
-        assertFalse(content.contains(projectName));
+        final String content = "# ${project.name}\n" +
+            "Gradle plugin to publish markdown pages to confluence ```java\ncode;\n``` _italic_";
+        final String pageVarName = "project.name";
+        final String pageVarValue = "HELLO_PROJECT";
+        final Map<String, String> pageVariables = new HashMap<String, String>() {{
+            put(pageVarName, pageVarValue);
+        }};
+        final String wikiText = markdownService.convertMarkdown2Wiki(content, pageVariables);
 
-        Map<String,String>  stringMap = new StringMapBuilder(key,projectName).build();
-
-        confluenceConfig.setPageVariables(stringMap);
-
-        String wiki = markdown2XtmlService.convertMarkdown2Wiki(content, confluenceConfig);
-
-        assertFalse(wiki.contains("${"+key +"}"));
-        assertTrue(wiki.contains(projectName));
-
+        assertFalse(wikiText.contains("${" + pageVarName + "}"));
+        assertTrue(wikiText.contains(pageVarValue));
     }
 
     @Test
-    public void testNotReplacePropertiesInCode() throws Exception {
+    public void testNotReplacePropertiesInCode() {
 
-        String content = "# ${project.name} \n" +
-                "Gradle plugin to publish markdown pages to confluence ```java \n${java.code};\n``` _italic_";
-        String key = "java.code";
-        String value = "String s = new String()";
-        assertTrue(content.contains("${"+key +"}"));
-        assertFalse(content.contains(value));
+        final String content = "# ${project.name}\n" +
+                "Gradle plugin to publish markdown pages to confluence ```java\n${java.code};\n``` _italic_";
+        final String pageVarName = "java.code";
+        final String pageVarValue = "String s = new String()";
+        final Map<String, String> pageVariables = new HashMap<String, String>() {{
+            put(pageVarName, pageVarValue);
+        }};
+        final String wikiText = markdownService.convertMarkdown2Wiki(content, pageVariables);
 
-        Map<String,String>  stringMap = new StringMapBuilder(key,value).build();
-
-        confluenceConfig.setPageVariables(stringMap);
-
-        String wiki = markdown2XtmlService.convertMarkdown2Wiki(content, confluenceConfig);
-
-        assertFalse(wiki.contains("${"+key +"}"));
-        assertTrue(wiki.contains(value));
-
+        assertFalse(wikiText.contains("${" + pageVarName + "}"));
+        assertTrue(wikiText.contains(pageVarValue));
     }
 
     @Test
-    public void testMarkdownLinkReplace() throws Exception {
-        String content = "[скачать](${url})";
-        String key = "url";
-        String value = "http://localhost";
+    public void testMarkdownLinkReplace() {
 
-        assertTrue(content.contains("${"+key +"}"));
-        assertFalse(content.contains(value));
-        Map<String,String>  stringMap = new StringMapBuilder(key,value).build();
-        confluenceConfig.setPageVariables(stringMap);
+        final String content = "[скачать](${url})";
+        final String pageVarName = "url";
+        final String pageVarValue = "https://localhost";
+        final Map<String, String> pageVariables = new HashMap<String, String>() {{
+            put(pageVarName, pageVarValue);
+        }};
+        final String wikiText = markdownService.convertMarkdown2Wiki(content, pageVariables);
 
-        String wiki = markdown2XtmlService.convertMarkdown2Wiki(content, confluenceConfig);
-
-        assertFalse(wiki.contains("${"+key +"}"));
-        assertTrue(wiki.contains(value));
-
+        assertFalse(wikiText.contains("${" + pageVarName + "}"));
+        assertTrue(wikiText.contains(pageVarValue));
     }
 }

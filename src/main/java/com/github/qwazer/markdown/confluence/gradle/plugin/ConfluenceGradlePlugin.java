@@ -15,18 +15,18 @@
  */
 package com.github.qwazer.markdown.confluence.gradle.plugin;
 
-import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class ConfluenceGradlePlugin implements Plugin<Project> {
 
     @Override
     public void apply(final Project project) {
-        project.getExtensions().create("confluence", ConfluenceConfig.class);
+        project.getExtensions().create("confluence", ConfluenceExtension.class);
 
         final Map<String, Object> options = new HashMap<>();
         options.put("type", ConfluenceGradleTask.class);

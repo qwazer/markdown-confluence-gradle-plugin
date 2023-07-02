@@ -1,0 +1,20 @@
+plugins {
+    id 'com.github.qwazer.markdown-confluence'
+}
+
+// invalid configuration - no restApiUrl defined
+confluence {
+    authentication = 'admin:admin'.bytes.encodeBase64().toString()
+    spaceKey = 'SN'
+    sslTrustAll = true
+    pageVariables = ['project.name': project.name, 'project.version': project.version]
+
+    pages {
+        // page title and parentTitle are the same and this is not allowed
+        "Releases" {
+            parentTitle = "${project.name}"
+            srcFile = file("README.md")
+            labels = ["${project.name}"]
+        }
+    }
+}

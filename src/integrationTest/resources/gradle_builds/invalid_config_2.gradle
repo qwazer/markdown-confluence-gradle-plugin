@@ -1,0 +1,20 @@
+plugins {
+    id 'com.github.qwazer.markdown-confluence'
+}
+
+// invalid configuration - no authentication property defined
+confluence {
+    restApiUrl = 'http://localhost:8090/rest/api/'
+    spaceKey = 'SN'
+    sslTrustAll = true
+    pageVariables = ['project.name': project.name, 'project.version': project.version]
+
+    pages {
+        // page title and parentTitle are the same and this is not allowed
+        "Releases" {
+            parentTitle = "${project.name}"
+            srcFile = file("README.md")
+            labels = ["${project.name}"]
+        }
+    }
+}

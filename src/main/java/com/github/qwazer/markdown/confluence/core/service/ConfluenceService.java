@@ -1,354 +1,473 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
-import com.github.qwazer.markdown.confluence.core.ConfluenceConfig;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.qwazer.markdown.confluence.core.ConfluenceException;
+import com.github.qwazer.markdown.confluence.core.HttpHeader;
+import com.github.qwazer.markdown.confluence.core.NotFoundException;
 import com.github.qwazer.markdown.confluence.core.model.ConfluencePage;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.PathNotFoundException;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
+import com.github.qwazer.markdown.confluence.core.model.ConfluenceSpace;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-
-import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by Anton Reshetnikov on 24 Nov 2016.
  */
-@Service
 public class ConfluenceService {
+
     private static final Logger LOG = LoggerFactory.getLogger(ConfluenceService.class);
 
+    private static final String BODY = "body";
     private static final String EXPAND = "expand";
     private static final String ID = "id";
+    private static final String SPACE = "space";
     private static final String SPACE_KEY = "spaceKey";
     private static final String TITLE = "title";
+    private static final String TYPE = "type";
+    private static final String PAGE_VERSION = "version";
+    private static final String VERSION_NUMBER = "number";
 
-    private final RestTemplate restTemplate;
+    private final HttpUrl baseUrl;
+    private final String spaceKey;
 
-    private ConfluenceConfig confluenceConfig;
-    private HttpHeaders httpHeaders;
-    private HttpHeaders httpHeadersForAttachment;
+    private final OkHttpClient httpClient;
+    private final ObjectMapper mapper;
 
-    @Autowired
-    public ConfluenceService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public ConfluenceService(
+        @Nonnull final String baseUrl,
+        @Nonnull final String spaceKey,
+        @Nonnull final OkHttpClient httpClient
+    ) {
+        this(baseUrl, spaceKey, httpClient, new ObjectMapper());
     }
 
-    public void setConfluenceConfig(ConfluenceConfig confluenceConfig) {
-        this.confluenceConfig = confluenceConfig;
-        httpHeaders = buildHttpHeaders(confluenceConfig);
-        httpHeadersForAttachment = buildHttpHeadersForAttachment(confluenceConfig);
+    public ConfluenceService(
+        @Nonnull final String baseUrl,
+        @Nonnull final String spaceKey,
+        @Nonnull final OkHttpClient httpClient,
+        @Nonnull final ObjectMapper mapper
+    ) {
+        this.baseUrl = HttpUrl.parse(baseUrl);
+        this.spaceKey = spaceKey;
+        this.httpClient = httpClient;
+        this.mapper = mapper
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
-    private static HttpHeaders buildHttpHeaders(final ConfluenceConfig config) {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", config.getAuthenticationType().getAuthorizationHeader(config));
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+    public Request getSpaceRequest(final String spaceKey) {
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegments(String.format("space/%s", spaceKey))
+            .build();
 
-        return headers;
+        return new Request.Builder()
+            .get()
+            .url(url)
+            .build();
     }
 
-    private static HttpHeaders buildHttpHeadersForAttachment(final ConfluenceConfig config) {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", config.getAuthenticationType().getAuthorizationHeader(config));
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.set("X-Atlassian-Token", "no-check");
-
-        return headers;
-    }
-
-
-    public ConfluencePage findPageByTitle(final String title) {
-
-        final HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-
-        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path("/content")
-                .queryParam(SPACE_KEY, confluenceConfig.getSpaceKey())
-                .queryParam(TITLE, title)
-                .queryParam(EXPAND, "body.storage,version,ancestors")
-                .build(false)
-                .encode()
-                .toUri();
-
-        final ResponseEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.GET, requestEntity, String.class);
-
-        ConfluencePage confluencePage = parseResponseEntityToConfluencePage(responseEntity);
-        return confluencePage;
-    }
-
-    public ConfluencePage findSpaceHomePage(final String spaceKey) {
-
-        final HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
-
-        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path("/content")
-                .queryParam(SPACE_KEY, confluenceConfig.getSpaceKey())
-                .queryParam(EXPAND, "body.storage,version,ancestors")
-                .build(false)
-                .encode()
-                .toUri();
-
-        final ResponseEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.GET, requestEntity, String.class);
-
-        ConfluencePage confluencePage = parseResponseEntityToConfluencePage(responseEntity);
-        return confluencePage;
-    }
-
-
-    public void updatePage(final ConfluencePage page) {
-
-        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path(String.format("/content/%s", page.getId()))
-                .build()
-                .toUri();
-
-
-        final JSONObject postVersionObject = new JSONObject();
-        postVersionObject.put("number", page.getVersion() + 1);
-
-        final JSONObject postBody = buildPostBody(page);
-        postBody.put(ID, page.getId());
-        postBody.put("version", postVersionObject);
-
-        final HttpEntity<String> requestEntity = new HttpEntity<>(postBody.toJSONString(), httpHeaders);
-
-        LOG.debug("Request of updating page: {}", postBody);
-
-        final HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl, HttpMethod.PUT, requestEntity, String.class);
-
-        LOG.debug("Response of updating page: {}", responseEntity.getBody());
-
-    }
-
-    public Long createPage(final ConfluencePage page) {
-        final URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path("/content")
-                .build()
-                .toUri();
-
-        final String jsonPostBody = buildPostBody(page).toJSONString();
-
-        LOG.debug("Request of creating page: {}", jsonPostBody);
-
-        final HttpEntity<String> requestEntity = new HttpEntity<>(jsonPostBody, httpHeaders);
-
-        final HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.POST, requestEntity, String.class);
-
-        LOG.debug("Response of creating page: {}", responseEntity.getBody());
-
-        return parsePageIdFromResponse(responseEntity);
-    }
-
-
-    public void addLabels(Long pageId, Collection<String> labels) {
-        if (labels == null || labels.isEmpty())
-            return;
-
-        URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path("/content/{id}/label")
-                .buildAndExpand(pageId)
-                .toUri();
-
-        final String jsonPostBody = buildAddLabelsPostBody(labels);
-
-        LOG.debug("Request of adding labels: {}", jsonPostBody);
-        HttpEntity<String> requestEntity = new HttpEntity<>(jsonPostBody, httpHeaders);
-        HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.POST, requestEntity, String.class);
-        LOG.debug("Response of adding labels: {}", responseEntity.getBody());
-
-    }
-
-
-    private static String buildAddLabelsPostBody(Collection<String> labels) {
-        if (labels == null || labels.isEmpty()) return null;
-        JSONArray jsonArray = new JSONArray();
-        for (String s : labels) {
-            if (s != null && !s.isEmpty()) {
-                JSONObject label = new JSONObject();
-                label.put("prefix", "global");
-                label.put("name", s);
-                jsonArray.add(label);
-            }
-        }
-        return jsonArray.toJSONString();
-    }
-
-
-    protected static ConfluencePage parseResponseEntityToConfluencePage(ResponseEntity<String> responseEntity) {
-        final String jsonBody = responseEntity.getBody();
-
+    @Nullable
+    public ConfluenceSpace getSpace(final String spaceKey) {
         try {
-            LOG.debug("Try to parse response: {}", jsonBody);
-
-            final String id = JsonPath.read(jsonBody, "$.results[0].id");
-            final Integer version = JsonPath.read(jsonBody, "$.results[0].version.number");
-
-            final JSONArray ancestors = JsonPath.read(jsonBody, "$.results[0].ancestors");
-
-            ConfluencePage confluencePage = new ConfluencePage();
-
-            if (!ancestors.isEmpty()) {
-                final Map<String, Object> lastAncestor = (Map<String, Object>) ancestors.get(ancestors.size() - 1);
-                final Long ancestorId = Long.valueOf((String) lastAncestor.get(ID));
-
-                LOG.debug("ancestors: {} : {}, choose -> {}", ancestors.getClass().getName(), ancestors, ancestorId);
-
-
-                confluencePage.setAncestorId(ancestorId);
-            }
-
-            confluencePage.setId(Long.parseLong(id));
-            confluencePage.setVersion(version);
-
-            return confluencePage;
-
-        } catch (final PathNotFoundException e) {
+            return mapper.convertValue(executeRequest(getSpaceRequest(spaceKey)), ConfluenceSpace.class);
+        } catch (IllegalArgumentException e) {
+            throw new ConfluenceException(e.getMessage(), e);
+        } catch (NotFoundException e) {
             return null;
         }
     }
 
+    public ConfluenceSpace getOrCreateSpace(final String spaceKey) {
+        ConfluenceSpace existingSpace = getSpace(spaceKey);
+        if (existingSpace == null) {
+            return createSpace(new ConfluenceSpace(spaceKey));
+        } else {
+            return existingSpace;
+        }
+    }
 
-    private JSONObject buildPostBody(ConfluencePage confluencePage) {
+    public Request createSpaceRequest(final ConfluenceSpace space) {
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegment("space")
+            .build();
 
-        final JSONObject jsonSpaceObject = new JSONObject();
-        jsonSpaceObject.put("key", confluenceConfig.getSpaceKey());
+        return new Request.Builder()
+            .url(url)
+            .post(RequestBody.create(mapper.convertValue(space, JsonNode.class).toString(), MediaType.parse("application/json")))
+            .build();
+    }
 
-        final JSONObject jsonStorageObject = new JSONObject();
-        jsonStorageObject.put("value", confluencePage.getContent());
-        //  jsonStorageObject.put("representation", "storage");
-        jsonStorageObject.put("representation", "wiki");
+    public ConfluenceSpace createSpace(final ConfluenceSpace space) {
+        return mapper.convertValue(executeRequest(createSpaceRequest(space)), ConfluenceSpace.class);
+    }
 
-        final JSONObject jsonBodyObject = new JSONObject();
-        jsonBodyObject.put("storage", jsonStorageObject);
+    public Request findPageByTitleRequest(final String title) {
 
-        final JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "page");
-        jsonObject.put(TITLE, confluencePage.getTitle());
-        jsonObject.put("space", jsonSpaceObject);
-        jsonObject.put("body", jsonBodyObject);
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegment("content")
+            .setQueryParameter(SPACE_KEY, spaceKey)
+            .setQueryParameter(TITLE, title)
+            .setQueryParameter(EXPAND, "body.storage,version,ancestors,metadata.labels")
+            .build();
+
+        return new Request.Builder()
+            .get()
+            .url(url)
+            .build();
+    }
+
+    @Nullable // if the page with the given title does not exist
+    public ConfluencePage findPageByTitle(final String title) {
+        try {
+            return parseResponseEntityToConfluencePage(executeRequest(findPageByTitleRequest(title)));
+        } catch (NotFoundException e) {
+            LOG.debug("Page \"{}\" not found in space \"{}\"", title, spaceKey);
+            return null;
+        }
+    }
+
+    public Request findSpaceHomePageRequest() {
+
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegment("content")
+            .setQueryParameter(SPACE_KEY, spaceKey)
+            .setQueryParameter(EXPAND, "body.storage,version,ancestors")
+            .build();
+
+        return new Request.Builder()
+            .get()
+            .url(url)
+            .build();
+    }
+
+    public ConfluencePage findSpaceHomePage() {
+        return parseResponseEntityToConfluencePage(executeRequest(findSpaceHomePageRequest()));
+    }
+
+    public void updatePage(final ConfluencePage page) {
+        executeRequest(updatePageRequest(page));
+    }
+
+    public Request updatePageRequest(final ConfluencePage page) {
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegments(String.format("content/%s", page.getId()))
+            .build();
+
+        final ObjectNode requestBody = buildPostBody(page);
+        requestBody.put(ID, page.getId());
+        requestBody.set(PAGE_VERSION, mapper.createObjectNode().put(VERSION_NUMBER, page.getVersion() + 1));
+
+        return new Request.Builder()
+            .url(url)
+            .put(RequestBody.create(requestBody.toString(), MediaType.parse("application/json")))
+            .build();
+    }
+
+    private JsonNode executeRequest(final Request request) {
+        try (final Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                if (response.code() == 404) {
+                    throw new NotFoundException(String.format("The requested resource %s was not found", request.url()));
+                }
+                final String message = String.format(
+                    "%s: %s",
+                    response,
+                    response.body() != null ? response.body().string() : "EMPTY BODY"
+                );
+                throw new ConfluenceException(message);
+            }
+            try (final ResponseBody responseBody = response.body()) {
+                if (responseBody == null) {
+                    throw new ConfluenceException(String.format("%s has null body", response));
+                }
+                return mapper.readTree(responseBody.bytes());
+            } catch (IOException e) {
+                throw new ConfluenceException("Could not parse Confluence REST API response", e);
+            }
+
+        } catch (IOException e) {
+            throw new ConfluenceException("Could not process response", e);
+        }
+    }
+
+    public Request createPageRequest(final ConfluencePage page) {
+
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegment("content")
+            .build();
+
+        final ObjectNode requestBody = buildPostBody(page);
+        return new Request.Builder()
+            .url(url)
+            .post(RequestBody.create(requestBody.toString(), MediaType.parse("application/json")))
+            .build();
+    }
+
+    public Long createPage(final ConfluencePage page) {
+        return parsePageIdFromResponse(executeRequest(createPageRequest(page)));
+    }
+
+
+    public Request addLabelsRequest(Long pageId, @Nonnull String labelName) {
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegments(String.format("content/%d/label", pageId))
+            .build();
+
+        final JsonNode requestBody = buildAddLabelPostBody(labelName);
+        return new Request.Builder()
+            .url(url)
+            .post(RequestBody.create(requestBody.toString(), MediaType.parse("application/json")))
+            .build();
+    }
+
+    public void addLabels(Long pageId, @Nonnull Collection<String> labels) {
+        Objects.requireNonNull(labels);
+        if (labels.isEmpty())
+            return;
+
+        labels.forEach(label -> executeRequest(addLabelsRequest(pageId, label)));
+    }
+
+
+    private JsonNode buildAddLabelPostBody(@Nonnull String labelName) {
+        final ObjectNode label = mapper.createObjectNode()
+            .put("name", labelName.replaceAll("\\.", "-"))
+            .put("prefix", "global");
+        return mapper.createArrayNode().add(label);
+    }
+
+
+    protected static ConfluencePage parseResponseEntityToConfluencePage(JsonNode responseBody) {
+        if (responseBody == null) {
+            return null;
+        }
+
+        final JsonNode results = responseBody.get("results");
+        if (results != null) {
+            final JsonNode first = results.get(0);
+            if (first != null) {
+                final ConfluencePage confluencePage = new ConfluencePage();
+                confluencePage.setId(first.get("id").asLong());
+                confluencePage.setVersion(first.get("version").get("number").asInt());
+                confluencePage.setTitle(first.get("title").asText());
+
+                final JsonNode bodyNode = first.get("body");
+                if (bodyNode != null) {
+                    final JsonNode storageNode = bodyNode.get("storage");
+                    if (storageNode != null) {
+                        JsonNode valueNode = storageNode.get("value");
+                        if (valueNode != null) {
+                            confluencePage.setContent(valueNode.asText());
+                        }
+                    }
+                }
+
+                final JsonNode metadataNode = first.get("metadata");
+                if (metadataNode != null) {
+                    final JsonNode labelsNode = metadataNode.get("labels");
+                    if (labelsNode != null) {
+                        final List<String> labels = labelsNode.findValues("name").stream()
+                            .map(JsonNode::asText)
+                            .collect(Collectors.toList());
+                        confluencePage.setLabels(labels);
+                    }
+                }
+
+                final JsonNode ancestors = first.get("ancestors");
+                if (ancestors instanceof ArrayNode) {
+                    final ArrayNode arrayNode = (ArrayNode) ancestors;
+                    if (!arrayNode.isEmpty()) {
+                        final Long ancestorId = arrayNode.get(arrayNode.size() - 1).get(ID).asLong();
+                        LOG.debug("ancestors: {} : {}, choose -> {}", ancestors.getClass().getName(), ancestors, ancestorId);
+                        confluencePage.setAncestorId(ancestorId);
+                    }
+                }
+                return confluencePage;
+            }
+        }
+
+        return null;
+    }
+
+
+    private ObjectNode buildPostBody(ConfluencePage confluencePage) {
+
+        final ObjectNode spaceNode = mapper.createObjectNode();
+        spaceNode.put("key", spaceKey);
+
+        final ObjectNode storageData = mapper.createObjectNode();
+        storageData.put("value", confluencePage.getContent());
+        storageData.put("representation", "wiki");
+
+        final ObjectNode storageNode = mapper.createObjectNode();
+        storageNode.set("storage", storageData);
+
+        final ObjectNode bodyNode = mapper.createObjectNode();
+        bodyNode.put(TYPE, "page");
+        bodyNode.put(TITLE, confluencePage.getTitle());
+        bodyNode.set(SPACE, spaceNode);
+        bodyNode.set(BODY, storageNode);
 
         if (confluencePage.getAncestorId() != null) {
-            final JSONObject ancestor = new JSONObject();
+            final ObjectNode ancestor = mapper.createObjectNode();
             ancestor.put("type", "page");
             ancestor.put(ID, confluencePage.getAncestorId());
 
-            final JSONArray ancestors = new JSONArray();
+            final ArrayNode ancestors = mapper.createArrayNode();
             ancestors.add(ancestor);
 
-            jsonObject.put("ancestors", ancestors);
+            bodyNode.set("ancestors", ancestors);
         }
 
-        return jsonObject;
+        return bodyNode;
     }
 
     public Long findAncestorId(String title) {
-        LOG.info("Try to find ancestorId by title {}", title);
-
+        LOG.info("Looking up ancestor id by title {}", title);
         ConfluencePage page = findPageByTitle(title);
         if (page != null) {
             return page.getId();
         } else {
-            LOG.info("Try to use page home id as ancestorId", confluenceConfig.getSpaceKey());
-
-            ConfluencePage spaceHome = findSpaceHomePage(confluenceConfig.getSpaceKey());
-            return spaceHome.getId();
+            LOG.info("Using page home id ({}) as ancestorId", spaceKey);
+            return findSpaceHomePage().getId();
         }
     }
 
-    private static Long parsePageIdFromResponse(final HttpEntity<String> responseEntity) {
-        final String responseJson = responseEntity.getBody();
-        final JSONParser jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
-
+    private static Long parsePageIdFromResponse(final JsonNode responseEntity) {
         try {
-            final JSONObject response = jsonParser.parse(responseJson, JSONObject.class);
-            return Long.valueOf((String) response.get(ID));
-        } catch (ParseException e) {
+            return responseEntity.get(ID).asLong();
+        } catch (Exception e) {
             throw new ConfluenceException("Error Parsing JSON Response from Confluence!", e);
         }
     }
 
-    private static String parseAttachmentIdFromResponse(final HttpEntity<String> responseEntity) {
-        final String jsonBody = responseEntity.getBody();
-
-        try {
-            return JsonPath.read(jsonBody, "$.results[0].id");
-        } catch (final PathNotFoundException e) {
-            return null;
+    private static String parseAttachmentIdFromResponse(final JsonNode responseEntity) {
+        final JsonNode results = responseEntity.get("results");
+        if (results != null) {
+            final JsonNode first = results.get(0);
+            if (first != null) {
+                final JsonNode id = first.get("id");
+                if (id != null) {
+                    return id.asText();
+                }
+            }
         }
+        return null;
+    }
+
+    public Request getAttachmentIdRequest(Long pageId, String attachmentFilename) {
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegments(String.format("content/%d/child/attachment", pageId))
+            .addQueryParameter("filename", attachmentFilename)
+            .build();
+
+        return new Request.Builder()
+            .get()
+            .url(url)
+            .build();
     }
 
     public String getAttachmentId(Long pageId, String attachmentFilename) {
+        return parseAttachmentIdFromResponse(executeRequest(getAttachmentIdRequest(pageId, attachmentFilename)));
+    }
 
-        final HttpEntity<String> requestEntity = new HttpEntity<>(httpHeaders);
+    public Request createAttachmentRequest(@Nonnull Long pageId, @Nonnull String filePath) {
+        Objects.requireNonNull(pageId);
+        Objects.requireNonNull(filePath);
+        final Path path = Paths.get(filePath);
+        if (Files.notExists(path)) {
+            throw new IllegalArgumentException("File not found: " + filePath);
+        }
 
-        URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path("/content/{id}/child/attachment")
-                .queryParam("filename", attachmentFilename)
-                .buildAndExpand(pageId)
-                .toUri();
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegments(String.format("content/%d/child/attachment", pageId))
+            .build();
 
-        final HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.GET, requestEntity, String.class);
+        final RequestBody requestBody = new MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart(
+                "file",
+                path.getFileName().toString(),
+                RequestBody.create(path.toFile(), MediaType.parse("application/octet-stream"))
+            )
+            .build();
 
-        LOG.debug("Response of creating attachment: {}", responseEntity.getBody());
-
-        return parseAttachmentIdFromResponse(responseEntity);
+        return new Request.Builder()
+            .url(url)
+            .header(HttpHeader.X_ATLASSIAN_TOKEN, "no-check")
+            .post(requestBody)
+            .build();
     }
 
     public void createAttachment(Long pageId, String filePath) {
-        URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path("/content/{id}/child/attachment")
-                .buildAndExpand(pageId)
-                .toUri();
-        postAttachment(targetUrl, filePath);
+        executeRequest(createAttachmentRequest(pageId, filePath));
+    }
+
+    public Request updateAttachmentRequest(@Nonnull Long pageId, @Nonnull String attachmentId, @Nonnull String filePath) {
+        Objects.requireNonNull(pageId);
+        Objects.requireNonNull(attachmentId);
+        Objects.requireNonNull(filePath);
+
+        final Path path = Paths.get(filePath);
+        if (Files.notExists(path)) {
+            throw new IllegalArgumentException("File not found: " + filePath);
+        }
+
+        final RequestBody requestBody = new MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart(
+                "file",
+                path.getFileName().toString(),
+                RequestBody.create(path.toFile(), MediaType.parse("application/octet-stream"))
+            )
+            .build();
+
+        final HttpUrl url = baseUrl
+            .newBuilder()
+            .addPathSegments(String.format("content/%d/child/attachment/%s/data", pageId, attachmentId))
+            .build();
+
+        return new Request.Builder()
+            .url(url)
+            .header(HttpHeader.X_ATLASSIAN_TOKEN, "no-check")
+            .post(requestBody)
+            .build();
     }
 
     public void updateAttachment(Long pageId, String attachmentId, String filePath) {
-        URI targetUrl = UriComponentsBuilder.fromUriString(confluenceConfig.getRestApiUrl())
-                .path("/content/{pageId}/child/attachment/{attachmentId}/data")
-                .buildAndExpand(pageId, attachmentId)
-                .toUri();
-        postAttachment(targetUrl, filePath);
+        executeRequest(updateAttachmentRequest(pageId, attachmentId, filePath));
     }
 
-    public void postAttachment(URI targetUrl, String filePath) {
-        MultiValueMap<String, Object> body
-                = new LinkedMultiValueMap<>();
-        body.add("file", new FileSystemResource(filePath));
-
-        HttpEntity<MultiValueMap<String, Object>> multiValueMapHttpEntity = new HttpEntity<>(body, httpHeadersForAttachment);
-        HttpEntity<String> responseEntity = restTemplate.exchange(targetUrl,
-                HttpMethod.POST, multiValueMapHttpEntity, String.class);
-        LOG.debug("Response of adding attachment: {}", responseEntity.getBody());
-    }
-
-    /*
-     * Package-private access so that it's visible in tests.
-     */
-    HttpHeaders getHttpHeaders() {
-        return httpHeaders;
-    }
 }
