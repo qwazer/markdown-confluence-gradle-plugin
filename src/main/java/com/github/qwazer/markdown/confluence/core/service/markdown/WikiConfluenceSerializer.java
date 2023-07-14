@@ -460,23 +460,18 @@ public abstract class WikiConfluenceSerializer implements Visitor {
     @Override
     public void visit(final ExpImageNode ein) {
         // We always have a URL, relative or not
-
-        final ArrayList<String> alt = new ArrayList<String>();
-        boolean found = findByClass(ein, TextNode.class, new FindPredicate<TextNode>() {
-
-            @Override
-            public boolean f(TextNode node, Node parent, int index) {
-                alt.add(replaceProperties(node.getText()));
-                return true;
-            }
+        final ArrayList<String> alt = new ArrayList<>();
+        boolean found = findByClass(ein, TextNode.class, (node, parent, index) -> {
+            alt.add(replaceProperties(node.getText()));
+            return true;
         });
 
         if (!found) {
             throw new IllegalStateException("The alt name should be mandatory in Markdown for images: " + ein.url);
         }
 
-        String titlePart = isNotBlank(ein.title) ? format("|title=\"%s\"", ein.title) : "";
-        _buffer.append( format( "!%s|alt=\"%s\"%s!", ein.url, alt.get(0), titlePart));
+        String titlePart = isNotBlank(ein.title) ? format(", title=\"%s\"", ein.title) : "";
+        _buffer.append( format( "!%s|thumbnail, alt=\"%s\"%s!", ein.url, alt.get(0), titlePart));
 
     }
 

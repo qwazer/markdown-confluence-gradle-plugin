@@ -1,26 +1,12 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
-    }
-}
-
 plugins {
-    id "com.github.ben-manes.versions" version "0.40.0"
+    id 'java-gradle-plugin'
+    id 'jvm-test-suite'
+    id 'com.gradle.plugin-publish' version '1.2.0'
+    id 'com.github.ben-manes.versions' version '0.40.0'
 }
 
 group 'com.github.qwazer'
-version "$VERSION"
 description 'A plugin for publishing markdown or confluence wiki files to to an Atlassian Confluence server'
-
-apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'com.gradle.plugin-publish'
 
 repositories {
     mavenCentral()
@@ -30,51 +16,48 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
     }
-    compileJava.options.encoding = "UTF-8"
-    compileTestJava.options.encoding = "UTF-8"
+    compileJava.options.encoding = 'UTF-8'
+    compileTestJava.options.encoding = 'UTF-8'
 }
 
 dependencies {
     implementation gradleApi()
-    implementation "org.slf4j:slf4j-api:1.7.25"
-    implementation "org.springframework:spring-core:$SPRING_VERSION"
-    implementation "org.springframework:spring-context:$SPRING_VERSION"
-    implementation "org.springframework:spring-web:$SPRING_VERSION"
-    implementation "com.jayway.jsonpath:json-path:2.4.0"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.12.3"
-    implementation "org.jsoup:jsoup:1.11.2"
-    implementation "org.pegdown:pegdown:1.6.0"
-
-
-    testImplementation gradleTestKit()
-    testImplementation 'commons-io:commons-io:2.7'
-    testImplementation 'junit:junit:4.13.1'
-    testImplementation "org.mockito:mockito-core:2.18.0"
-    testImplementation "org.springframework:spring-test:$SPRING_VERSION"
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'org.pegdown:pegdown:1.6.0'
 }
 
-
-publishing {
-    publications {
-        MyPublication(MavenPublication) {
-            from components.java
-            groupId 'com.github.qwazer'
-            artifactId project.name
-            version project.version
+gradlePlugin {
+    website = 'https://github.com/qwazer/markdown-confluence-gradle-plugin'
+    vcsUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin.git'
+    plugins {
+        markdownConfluenceGradlePlugin {
+            id = 'com.github.qwazer.markdown-confluence'
+            implementationClass = 'com.github.qwazer.markdown.confluence.gradle.plugin.ConfluenceGradlePlugin'
+            description = project.description
+            displayName = 'Markdown Confluence'
+            tags.set(['markdown', 'confluence'])
         }
     }
 }
 
-pluginBundle {
-    website = 'https://github.com/qwazer/markdown-confluence-gradle-plugin'
-    vcsUrl = 'https://github.com/qwazer/markdown-confluence-gradle-plugin.git'
-    description = project.description
-    tags = ['markdown', 'confluence']
+testing {
+    suites {
+        configureEach {
+            useJUnit()
+            dependencies {
+                implementation gradleTestKit()
+                implementation 'junit:junit:4.13.2'
+                implementation 'org.mockito:mockito-core:4.11.0'
+                implementation 'com.squareup.okhttp3:mockwebserver:4.11.0'
+            }
+        }
 
-    plugins {
-        markdownConfluenceGradlePlugin {
-            id = 'com.github.qwazer.markdown-confluence'
-            displayName = 'Markdown Confluence'
+        integrationTest(JvmTestSuite) {
+            testType = TestSuiteType.INTEGRATION_TEST
+            dependencies {
+                implementation(project())
+            }
         }
     }
 }

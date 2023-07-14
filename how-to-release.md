@@ -4,7 +4,7 @@
 2. git commit
 3. git tag
 4. git push
-6. go to jitpack, run the build
-7. publish to https://plugins.gradle.org via `gradle publishPlugins` task (`gradle login` may required from fresh workstation)
-8. update & run test `prev_release_availability.gradle`
-9. update [README](README.md)
+5. go to jitpack, run the build
+6. publish to https://plugins.gradle.org via `gradle publishPlugins` task (`gradle login` may be required from fresh workstation)
+7. update & run test `prev_release_availability.gradle`
+8. update [README](README.md)
