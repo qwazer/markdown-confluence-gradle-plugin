@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'com.github.qwazer'
-description 'A plugin for publishing markdown or confluence wiki files to to an Atlassian Confluence server'
+description 'A plugin for publishing markdown or confluence wiki files to an Atlassian Confluence server'
 
 repositories {
     mavenCentral()
