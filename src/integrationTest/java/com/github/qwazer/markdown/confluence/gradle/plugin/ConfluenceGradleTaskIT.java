@@ -182,7 +182,8 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
     }
 
     @Test
-    public void testVerboseError() throws IOException {
+    public void testEscapeUnknownMacro() throws IOException {
+        // Unknown confluence macros are escaped as text, so it doesn't fail having when having macro-like content.
 
         // src/integrationTest/resources/gradle_builds/build_4.gradle becomes $testProjectDir/build.gradle
         final Path srcBuildFilePath = GRADLE_BUILDS_PATH.resolve("build_4.gradle");
@@ -197,12 +198,16 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
             .withProjectDir(testProjectDir.getRoot())
             .withArguments("confluence")
             .forwardOutput()
-            .buildAndFail();
+            .build();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
-        assertEquals(buildTask.getOutcome(), FAILED);
-        assertTrue(result.getOutput().contains("The macro 'strange_macro' is unknown"));
+        assertEquals(buildTask.getOutcome(), SUCCESS);
+
+        final ConfluencePage projectPage = confluenceService.findPageByTitle("markdown-confluence-gradle-plugin");
+        assertNotNull(projectPage);
+        assertTrue(projectPage.getContent().contains("${strange_macro}"));
+
     }
 
     @Test

@@ -85,7 +85,7 @@ The below Markdown code:
 is translated to the following Confluence wiki:
 
 ```text
-!picture.jpg|thumbnail, alt="Picture Alt Text", title="Extra title"!
+!${page.title}^picture.jpg|Picture Alt Text!
 ```
 
 Plus the **pics/picture.jpg** file (relative to the Markdown file) is added as an attachment (named **picture.jpg**)

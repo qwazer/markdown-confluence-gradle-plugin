@@ -13,7 +13,7 @@ public class ConfluenceSpace {
     private final String type;
 
     public ConfluenceSpace(String key) {
-        this(null, key, null, null);
+        this(null, key, key, null);
     }
 
     @JsonCreator

@@ -91,13 +91,9 @@ public class ConfluenceGradleTask extends DefaultTask {
         // Creating components that implement plugin's logic
         final ConfluenceService confluenceService = new ConfluenceService(restApiUrl, spaceKey, httpClient);
 
-        final Long parseTimeout = extension.getParseTimeout().getOrNull();
         final MarkdownService markdownService;
-        if (parseTimeout == null) {
-            markdownService = new MarkdownService();
-        } else {
-            markdownService = new MarkdownService(parseTimeout);
-        }
+        markdownService = new MarkdownService();
+
         final AttachmentService attachmentService = new AttachmentService(confluenceService);
         final PageService pageService =
             new PageService(confluenceService, attachmentService, markdownService);

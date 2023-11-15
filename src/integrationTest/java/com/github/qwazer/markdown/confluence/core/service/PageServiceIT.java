@@ -1,7 +1,6 @@
 package com.github.qwazer.markdown.confluence.core.service;
 
 import com.github.qwazer.markdown.confluence.core.AbstractIT;
-import com.github.qwazer.markdown.confluence.core.ConfluenceException;
 import com.github.qwazer.markdown.confluence.gradle.plugin.ConfluenceExtension;
 import kotlin.Pair;
 import org.junit.Before;
@@ -15,7 +14,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Created by Anton Reshetnikov on 15 Nov 2016.
@@ -44,12 +42,13 @@ public class PageServiceIT extends AbstractIT {
         final String wikiText = pair.getFirst();
         final Map<String, Path> attachments = pair.getSecond();
 
-        assertTrue(wikiText.contains("!picture.jpg|thumbnail, alt=\"Cool Picture\", title=\"Cool Picture's Title\"!"));
+        assertTrue(wikiText.contains("!${page.title}^picture.jpg|Cool Picture!"));
         assertFalse(attachments.isEmpty());
     }
 
     @Test
-    public void testPublishingPageWithUnknownMacroShouldFail() throws IOException {
+    public void testPublishingPageWithUnknownMacro() throws IOException {
+        // Should escape unknown macros.
 
         ConfluenceExtension.Page page = Mockito.mock();
         Mockito.when(page.getName()).thenReturn("Page with invalid macro");
@@ -57,12 +56,10 @@ public class PageServiceIT extends AbstractIT {
         Mockito.when(page.getParentTitle()).thenReturn("Home");
         Mockito.when(page.getContent()).thenReturn("{no_such_macro}");
 
-        try {
-            pageService.publishWikiPage(page);
-        } catch (ConfluenceException e) {
-            assertTrue(e.getMessage().contains("The macro 'no_such_macro' is unknown"));
-            return;
-        }
-        fail();
+        final Pair<String, Map<String, Path>> pair = pageService.prepareWikiText(page);
+        final String wikiText = pair.getFirst();
+
+        assertTrue(wikiText.contains("\\{no_such_macro\\}"));
+
     }
 }
