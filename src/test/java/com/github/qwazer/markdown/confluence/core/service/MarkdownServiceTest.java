@@ -26,8 +26,7 @@ public class MarkdownServiceTest {
             put(pageVarName, pageVarValue);
         }};
         final String wikiText = markdownService.convertMarkdown2Wiki(content, pageVariables);
-        System.out.println(wikiText);
-        System.out.println("${" + pageVarName + "}");
+
         assertFalse(wikiText.contains("${" + pageVarName + "}"));
         assertTrue(wikiText.contains(pageVarValue));
     }
