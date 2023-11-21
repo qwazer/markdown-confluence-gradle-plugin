@@ -25,7 +25,6 @@ public abstract class ConfluenceExtension {
     abstract Property<String> getSpaceKey();
     abstract Property<Boolean> getSslTrustAll();
     abstract MapProperty<String, String> getPageVariables();
-    abstract Property<Long> getParseTimeout();
     abstract NamedDomainObjectContainer<Page> getConfiguredPages();
 
     private List<Page> pages;
