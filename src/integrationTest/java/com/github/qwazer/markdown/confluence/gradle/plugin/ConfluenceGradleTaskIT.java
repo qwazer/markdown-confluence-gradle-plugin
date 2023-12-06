@@ -37,7 +37,7 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
 
     // directory where we copy test build scripts and other resources from
     private static final Path GRADLE_BUILDS_PATH =
-        Paths.get("src", "integrationTest", "resources", "gradle_builds");
+            Paths.get("src", "integrationTest", "resources", "gradle_builds");
 
     // a directory that holds build scripts and other test resources required for testing the confluence task
     // defined by this plugin
@@ -73,15 +73,15 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         // before copying, the '$VERSION' placeholder is substituted with the current plugin's development version
         final Path srcSettingsFilePath = GRADLE_BUILDS_PATH.resolve("settings.gradle");
         final String settingsFileContent = new String(Files.readAllBytes(srcSettingsFilePath))
-            .replaceAll("\\$VERSION", Version.PROJECT_VERSION);
+                .replaceAll("\\$VERSION", Version.PROJECT_VERSION);
         final Path dstSettingsFilePath =
-            testProjectRootPath.resolve("settings.gradle");
+                testProjectRootPath.resolve("settings.gradle");
         Files.write(dstSettingsFilePath, settingsFileContent.getBytes(StandardCharsets.UTF_8));
 
         final String projectVersionProperty = "version=" + Version.PROJECT_VERSION;
         Files.write(
-            testProjectRootPath.resolve("gradle.properties"),
-            projectVersionProperty.getBytes(StandardCharsets.UTF_8)
+                testProjectRootPath.resolve("gradle.properties"),
+                projectVersionProperty.getBytes(StandardCharsets.UTF_8)
         );
     }
 
@@ -115,20 +115,20 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         // RELEASES.md file is created on the fly and added to $testProjectDir
         final Path releasesFilePath = testProjectDir.newFile("RELEASES.md").toPath();
         final String releasesFileContent =
-            "{children:reverse=true|sort=creation|style=h4|excerpt=none|first=99|depth=2|all=true}";
+                "{children:reverse=true|sort=creation|style=h4|excerpt=none|first=99|depth=2|all=true}";
         Files.write(releasesFilePath, releasesFileContent.getBytes(StandardCharsets.UTF_8));
 
         // RELEASE-$projectVersion.md file is created on the fly and added to $testProjectDir
         final Path releaseFilePath = testProjectDir.newFile("RELEASE-" + projectVersion + ".md").toPath();
         final String releaseFileContent =
-            "h1. " + projectVersion + "\n\nChanges in this version include...";
+                "h1. " + projectVersion + "\n\nChanges in this version include...";
         Files.write(releaseFilePath, releaseFileContent.getBytes(StandardCharsets.UTF_8));
 
         final BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir.getRoot())
-            .withArguments("confluence", "--stacktrace")
-            .forwardOutput()
-            .build();
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence", "--stacktrace")
+                .forwardOutput()
+                .build();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
@@ -195,10 +195,10 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         Files.write(readmeFilePath, "Markdown file with ${strange_macro}.".getBytes(StandardCharsets.UTF_8));
 
         BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir.getRoot())
-            .withArguments("confluence")
-            .forwardOutput()
-            .build();
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence")
+                .forwardOutput()
+                .build();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
@@ -208,6 +208,56 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         assertNotNull(projectPage);
         assertTrue(projectPage.getContent().contains("${strange_macro}"));
 
+    }
+
+    @Test
+    public void testAuthenticationTypeStringParsedCorrectly() throws IOException {
+
+        final String projectVersion = Version.PROJECT_VERSION;
+
+        // Because the project's README.md file defines the link to the pics/picture.jpg file, we copy that
+        // file to the testProjectDir, so that it's available when the confluence Gradle task runs in the
+        // testProjectDir
+        final Path picsFolderPath = testProjectDir.newFolder("pics").toPath();
+        Files.copy(Paths.get("pics", "picture.jpg"), picsFolderPath.resolve("picture.jpg"));
+
+        // src/integrationTest/resources/gradle_builds/build_1.gradle becomes $testProjectDir/build.gradle
+        final Path srcBuildFilePath = GRADLE_BUILDS_PATH.resolve("build_6.gradle");
+        final Path dstBuildFilePath = testProjectRootPath.resolve("build.gradle");
+        Files.copy(srcBuildFilePath, dstBuildFilePath);
+
+        // project's main README.md is copied to $testProjectDir
+        final Path srcReadmeFilePath = Paths.get("README.md");
+        final Path dstReadmeFilePath = testProjectRootPath.resolve("README.md");
+        Files.copy(srcReadmeFilePath, dstReadmeFilePath);
+
+        // RELEASES.md file is created on the fly and added to $testProjectDir
+        final Path releasesFilePath = testProjectDir.newFile("RELEASES.md").toPath();
+        final String releasesFileContent =
+                "{children:reverse=true|sort=creation|style=h4|excerpt=none|first=99|depth=2|all=true}";
+        Files.write(releasesFilePath, releasesFileContent.getBytes(StandardCharsets.UTF_8));
+
+        // RELEASE-$projectVersion.md file is created on the fly and added to $testProjectDir
+        final Path releaseFilePath = testProjectDir.newFile("RELEASE-" + projectVersion + ".md").toPath();
+        final String releaseFileContent =
+                "h1. " + projectVersion + "\n\nChanges in this version include...";
+        Files.write(releaseFilePath, releaseFileContent.getBytes(StandardCharsets.UTF_8));
+
+        final BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence", "--stacktrace")
+                .forwardOutput()
+                .build();
+
+        final BuildTask buildTask = result.task(":confluence");
+        assertNotNull(buildTask);
+        assertEquals(buildTask.getOutcome(), SUCCESS);
+
+        final ConfluencePage projectPage = confluenceService.findPageByTitle("markdown-confluence-gradle-plugin");
+        assertNotNull(projectPage);
+
+        final ConfluencePage releaseVersionPage = confluenceService.findPageByTitle(projectVersion);
+        assertNotNull(releaseVersionPage);
     }
 
     @Test
@@ -223,10 +273,10 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         Files.write(readmeFilePath, "# Whatever".getBytes(StandardCharsets.UTF_8));
 
         BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir.getRoot())
-            .withArguments("confluence")
-            .forwardOutput()
-            .buildAndFail();
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence")
+                .forwardOutput()
+                .buildAndFail();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
@@ -247,10 +297,10 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         Files.write(readmeFilePath, "# Whatever".getBytes(StandardCharsets.UTF_8));
 
         BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir.getRoot())
-            .withArguments("confluence")
-            .forwardOutput()
-            .buildAndFail();
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence")
+                .forwardOutput()
+                .buildAndFail();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
@@ -271,10 +321,10 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         Files.write(readmeFilePath, "# Whatever".getBytes(StandardCharsets.UTF_8));
 
         BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir.getRoot())
-            .withArguments("confluence")
-            .forwardOutput()
-            .buildAndFail();
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence")
+                .forwardOutput()
+                .buildAndFail();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
@@ -295,10 +345,10 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         Files.write(readmeFilePath, "# Whatever".getBytes(StandardCharsets.UTF_8));
 
         BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir.getRoot())
-            .withArguments("confluence")
-            .forwardOutput()
-            .buildAndFail();
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence")
+                .forwardOutput()
+                .buildAndFail();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
@@ -319,10 +369,10 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         Files.write(readmeFilePath, "# Whatever".getBytes(StandardCharsets.UTF_8));
 
         BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir.getRoot())
-            .withArguments("confluence")
-            .forwardOutput()
-            .buildAndFail();
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence")
+                .forwardOutput()
+                .buildAndFail();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
@@ -339,16 +389,61 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         Files.copy(srcBuildFilePath, dstBuildFilePath);
 
         BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir.getRoot())
-            .withArguments("confluence", "--stacktrace")
-            .forwardOutput()
-            .buildAndFail();
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence", "--stacktrace")
+                .forwardOutput()
+                .buildAndFail();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
         assertEquals(buildTask.getOutcome(), FAILED);
         assertTrue(result.getOutput().contains("File not found:"));
         assertTrue(result.getOutput().contains("NoSuchFile.md"));
+    }
+
+    @Test
+    public void testInvalidConfigurationAuthenticationTypeStringInvalid() throws IOException {
+
+        final String projectVersion = Version.PROJECT_VERSION;
+
+        // Because the project's README.md file defines the link to the pics/picture.jpg file, we copy that
+        // file to the testProjectDir, so that it's available when the confluence Gradle task runs in the
+        // testProjectDir
+        final Path picsFolderPath = testProjectDir.newFolder("pics").toPath();
+        Files.copy(Paths.get("pics", "picture.jpg"), picsFolderPath.resolve("picture.jpg"));
+
+        // src/integrationTest/resources/gradle_builds/build_1.gradle becomes $testProjectDir/build.gradle
+        final Path srcBuildFilePath = GRADLE_BUILDS_PATH.resolve("invalid_config_7.gradle");
+        final Path dstBuildFilePath = testProjectRootPath.resolve("build.gradle");
+        Files.copy(srcBuildFilePath, dstBuildFilePath);
+
+        // project's main README.md is copied to $testProjectDir
+        final Path srcReadmeFilePath = Paths.get("README.md");
+        final Path dstReadmeFilePath = testProjectRootPath.resolve("README.md");
+        Files.copy(srcReadmeFilePath, dstReadmeFilePath);
+
+        // RELEASES.md file is created on the fly and added to $testProjectDir
+        final Path releasesFilePath = testProjectDir.newFile("RELEASES.md").toPath();
+        final String releasesFileContent =
+                "{children:reverse=true|sort=creation|style=h4|excerpt=none|first=99|depth=2|all=true}";
+        Files.write(releasesFilePath, releasesFileContent.getBytes(StandardCharsets.UTF_8));
+
+        // RELEASE-$projectVersion.md file is created on the fly and added to $testProjectDir
+        final Path releaseFilePath = testProjectDir.newFile("RELEASE-" + projectVersion + ".md").toPath();
+        final String releaseFileContent =
+                "h1. " + projectVersion + "\n\nChanges in this version include...";
+        Files.write(releaseFilePath, releaseFileContent.getBytes(StandardCharsets.UTF_8));
+
+        final BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence", "--stacktrace")
+                .forwardOutput()
+                .buildAndFail();
+
+        final BuildTask buildTask = result.task(":confluence");
+        assertNotNull(buildTask);
+        assertEquals(buildTask.getOutcome(), FAILED);
+        assertTrue(result.getOutput().contains("No enum constant"));
     }
 
     @Test
@@ -364,21 +459,21 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
         // Creating README.md file that uses page variables
         final Path readmeFilePath = testProjectDir.newFile("README.md").toPath();
         final String markdown =
-            "# Header 1\nThe project name is ${project.name} and project version is: ${project.version}";
+                "# Header 1\nThe project name is ${project.name} and project version is: ${project.version}";
         Files.write(readmeFilePath, markdown.getBytes(StandardCharsets.UTF_8));
 
         BuildResult result = GradleRunner.create()
-            .withProjectDir(testProjectDir.getRoot())
-            .withArguments("confluence")
-            .forwardOutput()
-            .build();
+                .withProjectDir(testProjectDir.getRoot())
+                .withArguments("confluence")
+                .forwardOutput()
+                .build();
 
         final BuildTask buildTask = result.task(":confluence");
         assertNotNull(buildTask);
         assertEquals(buildTask.getOutcome(), SUCCESS);
 
         final ConfluencePage confluencePage =
-            confluenceService.findPageByTitle(expectedPageTitle);
+                confluenceService.findPageByTitle(expectedPageTitle);
         assertNotNull(confluencePage);
         final String content = confluencePage.getContent();
         assertNotNull(content);
@@ -389,9 +484,9 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
     public void testMultiModuleProject() throws IOException {
 
         Files.write(
-            testProjectRootPath.resolve("settings.gradle"),
-            "\ninclude 'server'\n".getBytes(StandardCharsets.UTF_8),
-            StandardOpenOption.APPEND
+                testProjectRootPath.resolve("settings.gradle"),
+                "\ninclude 'server'\n".getBytes(StandardCharsets.UTF_8),
+                StandardOpenOption.APPEND
         );
 
         // src/integrationTest/resources/gradle_builds/build_3.gradle becomes $testProjectDir/build.gradle
@@ -401,20 +496,20 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
 
         final Path submodulePath = testProjectDir.newFolder("server").toPath();
         Files.copy(
-            GRADLE_BUILDS_PATH.resolve("build_5b.gradle"),
-            submodulePath.resolve("build.gradle")
+                GRADLE_BUILDS_PATH.resolve("build_5b.gradle"),
+                submodulePath.resolve("build.gradle")
         );
 
         // Creating README.md file with invalid Markdown markup
         final String markdown =
-            "# ${project.name}\nThe project name is ${project.name} and project version is: ${project.version}. Project's parent name is: ${root.project.name}.";
+                "# ${project.name}\nThe project name is ${project.name} and project version is: ${project.version}. Project's parent name is: ${root.project.name}.";
         Files.write(submodulePath.resolve("README.md"), markdown.getBytes(StandardCharsets.UTF_8));
 
         BuildResult result = GradleRunner.create()
-            .withProjectDir(submodulePath.toFile())
-            .withArguments("confluence")
-            .forwardOutput()
-            .build();
+                .withProjectDir(submodulePath.toFile())
+                .withArguments("confluence")
+                .forwardOutput()
+                .build();
 
         final BuildTask buildTask = result.task(":server:confluence");
         assertNotNull(buildTask);
@@ -422,7 +517,7 @@ public class ConfluenceGradleTaskIT extends AbstractIT {
 
         final String expectedPageTitle = "markdown-confluence-gradle-plugin - server";
         final ConfluencePage confluencePage =
-            confluenceService.findPageByTitle(expectedPageTitle);
+                confluenceService.findPageByTitle(expectedPageTitle);
         assertNotNull(confluencePage);
         final String content = confluencePage.getContent();
         assertNotNull(content);

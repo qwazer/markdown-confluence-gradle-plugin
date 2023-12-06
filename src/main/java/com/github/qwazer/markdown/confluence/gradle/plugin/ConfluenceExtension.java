@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public abstract class ConfluenceExtension {
 
     abstract Property<AuthenticationType> getAuthenticationType();
+    abstract Property<String> getAuthenticationTypeString();
     abstract Property<String> getAuthentication();
     abstract Property<String> getRestApiUrl();
     abstract Property<String> getSpaceKey();
@@ -51,17 +52,17 @@ public abstract class ConfluenceExtension {
             return Collections.emptyList();
         }
         return pages.stream()
-            .collect(Collectors.partitioningBy(page -> hasParent(page, pages)))
-            .entrySet().stream()
-            .sorted(Map.Entry.comparingByKey())
-            .flatMap(entry -> {
-                if (entry.getKey()) { // pages with parent
-                    return getPages(entry.getValue()).stream();
-                } else { // pages with no parent
-                    return entry.getValue().stream();
-                }
-            })
-            .collect(Collectors.toList());
+                .collect(Collectors.partitioningBy(page -> hasParent(page, pages)))
+                .entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .flatMap(entry -> {
+                    if (entry.getKey()) { // pages with parent
+                        return getPages(entry.getValue()).stream();
+                    } else { // pages with no parent
+                        return entry.getValue().stream();
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     /**
@@ -69,7 +70,7 @@ public abstract class ConfluenceExtension {
      */
     boolean hasParent(Page page, List<Page> pages) {
         return pages.stream()
-            .anyMatch(pageFromPages -> pageFromPages != page && page.getParentTitle().equals(pageFromPages.getName()));
+                .anyMatch(pageFromPages -> pageFromPages != page && page.getParentTitle().equals(pageFromPages.getName()));
     }
 
     public static abstract class Page implements Named {
@@ -134,8 +135,8 @@ public abstract class ConfluenceExtension {
                 throw new IllegalArgumentException("labels cannot be null");
             }
             this.labels = labels.stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
         }
 
     }
