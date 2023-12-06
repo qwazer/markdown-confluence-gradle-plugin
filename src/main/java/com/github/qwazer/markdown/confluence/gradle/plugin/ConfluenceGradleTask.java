@@ -42,7 +42,7 @@ public class ConfluenceGradleTask extends DefaultTask {
 
         // obtaining plugins configuration
         final ConfluenceExtension extension =
-            Objects.requireNonNull(getProject().getExtensions().findByType(ConfluenceExtension.class));
+                Objects.requireNonNull(getProject().getExtensions().findByType(ConfluenceExtension.class));
 
         // validating each and every page configured
         extension.getConfiguredPages().forEach(page -> {
@@ -50,8 +50,8 @@ public class ConfluenceGradleTask extends DefaultTask {
             Utils.require(Files.exists(page.getSrcFile().toPath()), "File not found: " + page.getSrcFile());
             // page title and page parentTitle must not be same
             Utils.require(
-                !page.getTitle().equals(page.getParentTitle()),
-                String.format("Page title cannot be the same as page parent title: \"%s\"", page.getTitle())
+                    !page.getTitle().equals(page.getParentTitle()),
+                    String.format("Page title cannot be the same as page parent title: \"%s\"", page.getTitle())
             );
             // page title cannot be empty/blank
             Utils.require(page.isTitleSet(), "Page title cannot be blank/empty");
@@ -59,20 +59,23 @@ public class ConfluenceGradleTask extends DefaultTask {
             Utils.require(page.isParentTitleSet(), "Parent's title cannot be blank/empty");
         });
 
+        final String authenticationTypeString = extension.getAuthenticationTypeString().get();
         final AuthenticationType authenticationType =
-            extension.getAuthenticationType().getOrElse(AuthenticationType.BASIC);
+                !authenticationTypeString.isEmpty()?
+                        AuthenticationType.valueOf(authenticationTypeString):
+                        extension.getAuthenticationType().get();
         final String authentication = extension.getAuthentication().get();
         final String authorizationHeader = authenticationType.getAuthorizationHeader(authentication);
         final OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder()
-            .connectTimeout(Duration.ofSeconds(30))
-            .readTimeout(Duration.ofSeconds(60))
-            .writeTimeout(Duration.ofSeconds(60))
-            .addInterceptor(OkHttpUtils.getAuthorizationInterceptor(authorizationHeader));
+                .connectTimeout(Duration.ofSeconds(30))
+                .readTimeout(Duration.ofSeconds(60))
+                .writeTimeout(Duration.ofSeconds(60))
+                .addInterceptor(OkHttpUtils.getAuthorizationInterceptor(authorizationHeader));
 
         final boolean sslTrustAll = extension.getSslTrustAll().getOrElse(false);
         if (sslTrustAll) {
             httpClientBuilder
-                .sslSocketFactory(SslUtil.INSECURE_SSL_CONTEXT.getSocketFactory(), SslUtil.INSECURE_TRUST_MANAGER);
+                    .sslSocketFactory(SslUtil.INSECURE_SSL_CONTEXT.getSocketFactory(), SslUtil.INSECURE_TRUST_MANAGER);
             httpClientBuilder.hostnameVerifier((hostname, session) -> true);
         }
 
@@ -96,9 +99,9 @@ public class ConfluenceGradleTask extends DefaultTask {
 
         final AttachmentService attachmentService = new AttachmentService(confluenceService);
         final PageService pageService =
-            new PageService(confluenceService, attachmentService, markdownService);
+                new PageService(confluenceService, attachmentService, markdownService);
         final Map<String, String> pageVariables =
-            extension.getPageVariables().getOrElse(Collections.emptyMap());
+                extension.getPageVariables().getOrElse(Collections.emptyMap());
 
         // Publishing pages
         extension.getPages().forEach(page -> {
