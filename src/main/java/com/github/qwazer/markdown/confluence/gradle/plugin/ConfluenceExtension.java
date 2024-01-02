@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 
 public abstract class ConfluenceExtension {
 
-    abstract Property<AuthenticationType> getAuthenticationType();
+    public abstract Property<AuthenticationType> getAuthenticationType();
+    public abstract Property<String> getAuthentication();
+    public abstract Property<String> getRestApiUrl();
+    public abstract Property<String> getSpaceKey();
+    public abstract Property<Boolean> getSslTrustAll();
+    public abstract MapProperty<String, String> getPageVariables();
     abstract Property<String> getAuthenticationTypeString();
-    abstract Property<String> getAuthentication();
-    abstract Property<String> getRestApiUrl();
-    abstract Property<String> getSpaceKey();
-    abstract Property<Boolean> getSslTrustAll();
-    abstract MapProperty<String, String> getPageVariables();
     abstract NamedDomainObjectContainer<Page> getConfiguredPages();
 
     private List<Page> pages;
