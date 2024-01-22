@@ -27,7 +27,7 @@ public class AbstractIT {
         final OkHttpClient httpClient = new OkHttpClient.Builder()
             .addInterceptor(OkHttpUtils.getAuthorizationInterceptor(authorizationHeaderValue))
             .build();
-        confluenceService = new ConfluenceService(CONFLUENCE_BASE_URL, CONFLUENCE_SPACE_KEY,httpClient);
+        confluenceService = new ConfluenceService(CONFLUENCE_BASE_URL, CONFLUENCE_SPACE_KEY, httpClient);
         confluenceSpace = confluenceService.getOrCreateSpace(CONFLUENCE_SPACE_KEY);
     }
 
