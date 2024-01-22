@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
@@ -38,11 +39,11 @@ public class PageServiceIT extends AbstractIT {
         final String markdown = "# Page with inline image\n\nThis is an image: ![Cool Picture](pics/picture.jpg \"Cool Picture's Title\")";
         Mockito.when(page.getContent()).thenReturn(markdown);
 
-        final Pair<String, Map<String, Path>> pair = pageService.prepareWikiText(page);
+        final Pair<String, List<Path>> pair = pageService.prepareWikiText(page);
         final String wikiText = pair.getFirst();
-        final Map<String, Path> attachments = pair.getSecond();
+        final List<Path> attachments = pair.getSecond();
 
-        assertTrue(wikiText.contains("!${page.title}^picture.jpg|Cool Picture!"));
+        assertTrue(wikiText.contains("!picture.jpg|Cool Picture!"));
         assertFalse(attachments.isEmpty());
     }
 
@@ -56,7 +57,7 @@ public class PageServiceIT extends AbstractIT {
         Mockito.when(page.getParentTitle()).thenReturn("Home");
         Mockito.when(page.getContent()).thenReturn("{no_such_macro}");
 
-        final Pair<String, Map<String, Path>> pair = pageService.prepareWikiText(page);
+        final Pair<String, List<Path>> pair = pageService.prepareWikiText(page);
         final String wikiText = pair.getFirst();
 
         assertTrue(wikiText.contains("\\{no_such_macro\\}"));

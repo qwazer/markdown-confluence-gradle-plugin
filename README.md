@@ -39,7 +39,7 @@ confluence {
     spaceKey = 'SAMPLE'
     sslTrustAll = true
     pageVariables = ['project.name': project.name]
-    parseTimeout = 2000L
+    parserType = 'commonmark'
 
     pages {
         "Releases" {
@@ -61,31 +61,30 @@ titled the same as underlying files (minus file path and extension) and having `
 
 ```groovy
     pages {
-    fileTree("src")
+        fileTree("src")
             .include("**/*.md")
             .collect { file ->
-                def title =
-                        file.name.take(file.name.lastIndexOf('.'))
+                def title = file.name.take(file.name.lastIndexOf('.'))
                 "${title}" {
                     parentTitle = "Parent Page"
                     srcFile = file
                 }
-            }
-}
+        }
+    }
 ```
 
 ## Inline images.
 
 The below Markdown code:
 
-```markdown
+```text
 ![Picture Alt Text](pics/picture.jpg "Extra title")
 ```
 
 is translated to the following Confluence wiki:
 
 ```text
-!${page.title}^picture.jpg|Picture Alt Text!
+!picture.jpg|Picture Alt Text!
 ```
 
 Plus the **pics/picture.jpg** file (relative to the Markdown file) is added as an attachment (named **picture.jpg**)
@@ -94,24 +93,21 @@ to the generated Confluence page and correctly linked.
 
 ### Description of config parameters
 
-
-| parameter                | datatype                   | optional | description                                                                                                                                                                                                        |
-|:-------------------------|:---------------------------|:---------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| authenticationType       | Enum                       | yes      | Authentication type to use when calling Confluence APIs, one of: BASIC, PAT (Personal Access Token). Defaults to BASIC when not specified explicitly.                                                              |
-| authenticationTypeString | String                     | yes      | Overrides the above configuration using a string constant, one of: `BASIC`, `PAT` (Personal Access Token). Defaults to empty string when not specified explicitly.                                                 |
-| authentication           | String                     | no       | 'user:pass'.bytes.encodeBase64().toString() when `authenticationType` is `BASIC`, or token string when `authenticationType` is `PAT`.                                                                              |
-| restApiUrl               | String                     | no       | Confluence REST API URL.                                                                                                                                                                                           |
-| spaceKey                 | String                     | no       | Confluence space key.                                                                                                                                                                                              |
-| sslTrustAll              | Boolean                    | yes      | Setting to ignore self-signed and unknown certificate errors. Useful in some corporate environments.                                                                                                               |
-| pageVariables            | Map<String,String>         | yes      | Map of page variables, for example ```${project.name}``` in source file content will substituted by value of variable.                                                                                             |
-| parseTimeout             | Long                       | yes      | Timeout parameter for the Markdown serializer.                                                                                                                                                                     |
-| pages                    | Closure                    | no       | Collection of NamedDomainObjectContainer<Page>. If this collection contains multiple pages, they will be ordered according their parent-child relationship.                                                        |
-| page                     | NamedDomainObjectContainer | no       | Name of the container is the title of the page. Check [Declaring DSL configuration container](https://docs.gradle.org/current/userguide/implementing_gradle_plugins.html#declaring_a_dsl_configuration_container). |
-| page.parentTitle         | String                     | no       | The title of the parent page under which this page should be published. It is used to resolve target page ancestorId in Confluence.                                                                                |
-| page.srcFile             | File                       | no       | The Markdown file to be published as Confluence wiki page (can be mixed with [Confluence Wiki Markup](https://confluence.atlassian.com/doc/confluence-wiki-markup-251003035.html)).                                |
-| page.labels              | Collection<String>         | no       | Collection of labels to be added to the generated Confluence page.                                                                                                                                                 |
-
-
+| parameter                | datatype                   | optional | description                                                                                                                                                                                                                                                                              |
+|:-------------------------|:---------------------------|:---------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| authenticationType       | Enum                       | yes      | Authentication type to use when calling Confluence APIs, one of: BASIC, PAT (Personal Access Token). Defaults to BASIC when not specified explicitly.                                                                                                                                    |
+| authenticationTypeString | String                     | yes      | Overrides the above configuration using a string constant, one of: `BASIC`, `PAT` (Personal Access Token). Defaults to empty string when not specified explicitly.                                                                                                                       |
+| authentication           | String                     | no       | 'user:pass'.bytes.encodeBase64().toString() when `authenticationType` is `BASIC`, or token string when `authenticationType` is `PAT`.                                                                                                                                                    |
+| restApiUrl               | String                     | no       | Confluence REST API URL.                                                                                                                                                                                                                                                                 |
+| spaceKey                 | String                     | no       | Confluence space key.                                                                                                                                                                                                                                                                    |
+| sslTrustAll              | Boolean                    | yes      | Setting to ignore self-signed and unknown certificate errors. Useful in some corporate environments.                                                                                                                                                                                     |
+| pageVariables            | Map<String, String>        | yes      | Map of page variables. For example, if a Markdown file to be published contains `${myVar}` placeholder, and the `pageVariable` map has an entry with the `myVar` key, then the placeholder in the Markdown file in will be substituted by value of the map entry having the `myVar` key. |
+| parserType               | String                     | yes      | Markdown to Confluence wiki parser to use. One of: `commonmark` (default if not specified), `pegdown`.                                                                                                                                                                                   |
+| pages                    | Closure                    | no       | Collection of NamedDomainObjectContainer<Page>. If this collection contains multiple pages, they will be ordered according their parent-child relationship.                                                                                                                              |
+| page                     | NamedDomainObjectContainer | no       | Name of the container is the title of the page. Check [Declaring DSL configuration container](https://docs.gradle.org/current/userguide/implementing_gradle_plugins.html#declaring_a_dsl_configuration_container).                                                                       |
+| page.parentTitle         | String                     | no       | The title of the parent page under which this page should be published. It is used to resolve target page ancestorId in Confluence.                                                                                                                                                      |
+| page.srcFile             | File                       | no       | The Markdown file to be published as Confluence wiki page (can be mixed with [Confluence Wiki Markup](https://confluence.atlassian.com/doc/confluence-wiki-markup-251003035.html)).                                                                                                      |
+| page.labels              | Collection<String>         | yes      | Collection of labels to be added to the generated Confluence page.                                                                                                                                                                                                                       |  
 
 ### Run the build
 

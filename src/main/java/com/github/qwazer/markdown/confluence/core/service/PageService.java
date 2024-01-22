@@ -11,8 +11,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -31,7 +32,7 @@ public class PageService {
     private final AttachmentService attachmentService;
 
     public PageService(final ConfluenceService confluenceService) {
-        this(confluenceService, new AttachmentService(confluenceService), new MarkdownService());
+        this(confluenceService, new AttachmentService(confluenceService), new MarkdownServiceCommonmark());
     }
 
     public PageService(
@@ -48,7 +49,7 @@ public class PageService {
         this.markdownService = markdownService;
     }
 
-    public Pair<String, Map<String, Path>> prepareWikiText(ConfluenceExtension.Page page) throws IOException {
+    public Pair<String, List<Path>> prepareWikiText(ConfluenceExtension.Page page) throws IOException {
         return prepareWikiText(page, Collections.emptyMap());
     }
 
@@ -58,11 +59,11 @@ public class PageService {
     // e.g. (docs/images/logo.png or /Users/user/home/avatar.png). However, using absolute paths is typically not
     // portable, i.e., there's a little chance that the aforementioned path /Users/user/home/avatar.png will be
     // present on the build server in case you want to automate publishing of wiki pages during your CI builds.
-    public Pair<String, Map<String, Path>> prepareWikiText(ConfluenceExtension.Page page, Map<String, String> pageVariables) throws IOException {
+    public Pair<String, List<Path>> prepareWikiText(ConfluenceExtension.Page page, Map<String, String> pageVariables) throws IOException {
 
         final String markdownText = page.getContent();
 
-        final Map<String, Path> inlineImages = new HashMap<>();
+        final List<Path> inlineImages = new ArrayList<>();
         final Matcher matcher = INLINE_IMAGE_PATTERN.matcher(markdownText);
         while (matcher.find()) {
             // group[0] is the whole matched string
@@ -81,22 +82,17 @@ public class PageService {
                     path = Paths.get(uri);
                 }
                 if (Files.exists(path)) {
-                    inlineImages.put(uri, path);
+                    inlineImages.add(path);
                 } else {
                     final String message =
-                        String.format("Could not find local image '%s' referenced in the '%s' markdown file", page, page.getSrcFile());
+                        String.format("Could not find local image '%s' referenced in the '%s' markdown file", path, page.getSrcFile());
                     throw new ConfluenceException(message);
                 }
             }
         }
 
-        // initial version of the wiki text before processing inline images
-        String wikiText = markdownService.convertMarkdown2Wiki(markdownText, pageVariables);
-        for (Map.Entry<String, Path> entry : inlineImages.entrySet()) {
-            final String patternString = "!" + entry.getKey() + "\\|";
-            final String replacementString = "!" + entry.getValue().getFileName().toString() + "|";
-            wikiText = wikiText.replaceAll(patternString, replacementString);
-        }
+        final String wikiText =
+            markdownService.parseMarkdown(markdownText, pageVariables);
 
         return new Pair<>(wikiText, inlineImages);
 
@@ -108,9 +104,9 @@ public class PageService {
 
     public Long publishWikiPage(ConfluenceExtension.Page page, Map<String, String> pageVariables) throws IOException {
 
-        final Pair<String, Map<String, Path>> pair = prepareWikiText(page, pageVariables);
+        final Pair<String, List<Path>> pair = prepareWikiText(page, pageVariables);
         final String wikiText = pair.getFirst();
-        final Map<String, Path> images = pair.getSecond();
+        final List<Path> images = pair.getSecond();
 
         ConfluencePage confluencePage =
             confluenceService.findPageByTitle(page.getName());
@@ -135,8 +131,8 @@ public class PageService {
             confluenceService.addLabels(pageId, page.getLabels());
         }
 
-        for (Map.Entry<String, Path> entry : images.entrySet()) {
-            attachmentService.postAttachmentToPage(confluencePage.getId(), entry.getValue());
+        for (Path imageLocalPath : images) {
+            attachmentService.postAttachmentToPage(confluencePage.getId(), imageLocalPath);
         }
 
         return confluencePage.getId();

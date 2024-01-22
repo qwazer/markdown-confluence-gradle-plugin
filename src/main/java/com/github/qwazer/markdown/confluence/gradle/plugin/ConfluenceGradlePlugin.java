@@ -29,6 +29,7 @@ public class ConfluenceGradlePlugin implements Plugin<Project> {
         ConfluenceExtension extension = project.getExtensions().create("confluence", ConfluenceExtension.class);
         extension.getAuthenticationType().convention(AuthenticationType.BASIC);
         extension.getAuthenticationTypeString().convention("");
+        extension.getParserType().convention("commonmark");
 
         final Map<String, Object> options = new HashMap<>();
         options.put("type", ConfluenceGradleTask.class);
