@@ -27,7 +27,7 @@ public abstract class ConfluenceExtension {
     public abstract MapProperty<String, String> getPageVariables();
     abstract Property<String> getAuthenticationTypeString();
     abstract NamedDomainObjectContainer<Page> getConfiguredPages();
-    abstract Property<String> getParserType();
+    public abstract Property<String> getParserType();
 
     private List<Page> pages;
 
